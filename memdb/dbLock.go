@@ -7,6 +7,8 @@ import (
 	"sync"
 )
 
+// lock keys logically
+
 type Locks struct {
 	locks []*sync.RWMutex
 }
@@ -59,6 +61,8 @@ func (lock *Locks) RUnlock(key string) {
 	lock.locks[pos].RUnlock()
 }
 
+// when call LockMulti,call sortedLockPoses first sort the keys
+// to prevent the deadLock,lock keys from front to the end
 func (lock *Locks) sortedLockPoses(keys []string) []int {
 	set := make(map[int]struct{})
 	for _, key := range keys {
@@ -79,38 +83,39 @@ func (lock *Locks) sortedLockPoses(keys []string) []int {
 	sort.Ints(poses)
 	return poses
 }
-func(lock *Locks) LockMulti(keys []string) {
+func (lock *Locks) LockMulti(keys []string) {
 	poses := lock.sortedLockPoses(keys)
 	if poses == nil {
 		return
 	}
-	for _,pos := range poses {
+	for _, pos := range poses {
 		lock.locks[pos].Lock()
 	}
 }
-func(lock *Locks) UnLockMulti(keys []string) {
+func (lock *Locks) UnLockMulti(keys []string) {
 	poses := lock.sortedLockPoses(keys)
 	if poses == nil {
 		return
 	}
-	for _,pos := range poses {
+	for _, pos := range poses {
 		lock.locks[pos].Unlock()
 	}
-}func(lock *Locks) RLockMulti(keys []string) {
+}
+func (lock *Locks) RLockMulti(keys []string) {
 	poses := lock.sortedLockPoses(keys)
 	if poses == nil {
 		return
 	}
-	for _,pos := range poses {
+	for _, pos := range poses {
 		lock.locks[pos].RLock()
 	}
 }
-func(lock *Locks) RUnLockMulti(keys []string) {
+func (lock *Locks) RUnLockMulti(keys []string) {
 	poses := lock.sortedLockPoses(keys)
 	if poses == nil {
 		return
 	}
-	for _,pos := range poses {
+	for _, pos := range poses {
 		lock.locks[pos].RUnlock()
 	}
 }
