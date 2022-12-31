@@ -1,0 +1,5 @@
+2023-01-01T00:34:28.225+0800	[31mERROR[0m	fishRedis/main.go:14	hello
+2023-01-01T00:34:28.238+0800	[34mINFO[0m	fishRedis/main.go:15	hello
+2023-01-01T00:34:28.238+0800	[35mDEBUG[0m	fishRedis/main.go:16	hello
+2023-01-01T00:38:52.636+0800	[31mERROR[0m	fishRedis/main.go:14	hello %d23
+2023-01-01T00:39:11.396+0800	[31mERROR[0m	fishRedis/main.go:14	hello 23
