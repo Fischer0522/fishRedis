@@ -175,3 +175,10 @@ func TestLockMulti(t *testing.T) {
 	//	t.Error("some locks can't be released", count)
 	//}
 }
+
+func TestString(t *testing.T) {
+
+	test1 := "\u0000"
+	fmt.Println(test1)
+
+}
