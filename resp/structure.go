@@ -143,6 +143,14 @@ func (r *ArrayData) ToCommand() [][]byte {
 	return res
 }
 
+func (r *ArrayData) ByteData() []byte {
+	res := make([]byte, 0)
+	for _, v := range r.data {
+		res = append(res, v.ByteData()...)
+	}
+	return res
+}
+
 /*-----------------Plain Data----------------*/
 
 func MakePlainData(data string) *PlainData {

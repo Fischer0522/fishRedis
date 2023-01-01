@@ -36,9 +36,6 @@ func (m *MemDb) ExecCommand(cmd [][]byte) resp.RedisData {
 
 }
 
-// all lock and unlock action about ttl are here
-// when calling function about ttl shouldn't lock or unlock
-
 // CheckTTL check ttlkeys and delete expired keys
 // if the key doesn't exist or not is expired return true
 // if the key is expired,return false
@@ -61,6 +58,8 @@ func (m *MemDb) CheckTTL(key string) bool {
 
 }
 
+// SetTTL shouldn't acquire the lock
+// the SETEX is an atomic command,so we acquire lock in setExString
 func (m *MemDb) SetTTL(key string, value int64) int {
 	_, ok := m.db.Get(key)
 	if !ok {
@@ -68,8 +67,6 @@ func (m *MemDb) SetTTL(key string, value int64) int {
 		return 0
 	}
 	// the result should be 1
-	m.locks.Lock(key)
-	defer m.locks.Unlock(key)
 	return m.ttlKeys.Set(key, value)
 
 }
@@ -78,8 +75,6 @@ func (m *MemDb) DeleteTTL(key string) int {
 	if !ok {
 		dblog.Logger.Debugf("DeleteTTL key not exist key = %s,maybe is expired", key)
 	}
-	m.locks.Lock(key)
-	defer m.locks.Unlock(key)
 	return m.ttlKeys.Delete(key)
 
 }

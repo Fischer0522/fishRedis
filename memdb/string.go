@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-// when calling function about ttl
-// should call func about ttl first and then require lock
-// because func about already require lock and release lock
-
 func setString(m *MemDb, cmd [][]byte) resp.RedisData {
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "set" {
@@ -27,8 +23,8 @@ func setString(m *MemDb, cmd [][]byte) resp.RedisData {
 	var err error
 	var exval int64
 	var nx, xx, get, ex, keepttl bool
-	key := strings.ToLower(string(cmd[1]))
-	val := string(cmd[2])
+	key := string(cmd[1])
+	val := cmd[2]
 	for i := 3; i < len(cmd); i++ {
 		parm := strings.ToLower(string(cmd[i]))
 		switch parm {
@@ -146,7 +142,7 @@ func getRangeString(m *MemDb, cmd [][]byte) resp.RedisData {
 	if len(cmd) != 4 {
 		return resp.MakeErrorData("error:commands is invalid")
 	}
-	key := strings.ToLower(string(cmd[1]))
+	key := string(cmd[1])
 	start, err := strconv.Atoi(string(cmd[2]))
 	if err != nil {
 		return resp.MakeErrorData("error: command is invalid")
@@ -193,7 +189,7 @@ func setRangeString(m *MemDb, cmd [][]byte) resp.RedisData {
 	if len(cmd) != 4 {
 		return resp.MakeErrorData("error:commands is invalid")
 	}
-	key := strings.ToLower(string(cmd[1]))
+	key := string(cmd[1])
 	offset, err := strconv.Atoi(string(cmd[2]))
 	if err != nil {
 		return resp.MakeErrorData("error: command is invalid")
@@ -226,4 +222,108 @@ func setRangeString(m *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	m.db.Set(key, newVal)
 	return resp.MakeIntData(int64(len(newVal)))
+}
+func mGetString(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "mget" {
+		dblog.Logger.Error("mGetString func:cmdName != mget")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) < 2 {
+		return resp.MakeErrorData("error: commands is invalid")
+	}
+	length := len(cmd)
+	res := make([]resp.RedisData, 0)
+	for i := 1; i < length; i++ {
+		key := string(cmd[i])
+		if !m.CheckTTL(key) {
+			res = append(res, resp.MakeBulkData(nil))
+			continue
+		}
+		m.locks.RLock(key)
+		val, ok := m.db.Get(key)
+		m.locks.RUnlock(key)
+		if !ok {
+			res = append(res, resp.MakeBulkData(nil))
+			continue
+		}
+		valWithType, typeOk := val.([]byte)
+		if !typeOk {
+			res = append(res, resp.MakeBulkData(nil))
+		} else {
+			res = append(res, resp.MakeBulkData(valWithType))
+		}
+
+	}
+	return resp.MakeArrayData(res)
+}
+
+func mSetString(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "mset" {
+		dblog.Logger.Error("mSetString func:cmdName != mset")
+		return resp.MakeErrorData("server error")
+	}
+	length := len(cmd)
+	if length < 3 || length%2 == 0 {
+		return resp.MakeErrorData("error: command is invalid")
+	}
+	keys := make([]string, 0)
+	vals := make([][]byte, 0)
+	for i := 1; i < length; i += 2 {
+		key := string(cmd[i])
+		val := cmd[i+1]
+		keys = append(keys, key)
+		vals = append(vals, val)
+	}
+	m.locks.LockMulti(keys)
+	defer m.locks.UnlockMulti(keys)
+	for i := 0; i < len(keys); i++ {
+		m.DeleteTTL(keys[i])
+		m.db.Set(keys[i], vals[i])
+	}
+	return resp.MakeStringData("OK")
+}
+
+func setExString(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "setex" {
+		dblog.Logger.Error("setExString func:cmdName != setex")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) != 4 {
+		return resp.MakeErrorData("error: command is invalid")
+	}
+	// no need to checkTTL
+	key := string(cmd[1])
+	val := cmd[3]
+	ttlTime, err := strconv.ParseInt(string(cmd[2]), 10, 64)
+	if err != nil {
+		return resp.MakeErrorData("error: command is invalid")
+	}
+	newTTL := time.Now().Unix() + ttlTime
+
+	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
+	m.db.Set(key, val)
+	m.ttlKeys.Set(key, newTTL)
+	return resp.MakeStringData("OK")
+}
+func setNxString(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "setnx" {
+		dblog.Logger.Error("setNxString func:cmdName != setnx")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) != 3 {
+		return resp.MakeErrorData("error: command is invalid")
+	}
+	key := string(cmd[1])
+	val := cmd[2]
+	m.CheckTTL(key)
+	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
+	res := m.db.SetIfNotExist(key, val)
+	return resp.MakeIntData(int64(res))
+
 }
