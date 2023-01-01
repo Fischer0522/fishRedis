@@ -128,7 +128,7 @@ func (m *ConcurrentMap) Keys() []string {
 			keys[i] = key
 			i++
 		}
-		slot.rwMu.Unlock()
+		slot.rwMu.RUnlock()
 	}
 	return keys
 }
