@@ -54,7 +54,7 @@ func (m *MemDb) CheckTTL(key string) bool {
 	}
 	// expired now delete it
 	m.locks.Lock(key)
-	defer m.locks.UnLock(key)
+	defer m.locks.Unlock(key)
 	m.ttlKeys.Delete(key)
 	m.db.Delete(key)
 	return false
@@ -69,7 +69,7 @@ func (m *MemDb) SetTTL(key string, value int64) int {
 	}
 	// the result should be 1
 	m.locks.Lock(key)
-	defer m.locks.UnLock(key)
+	defer m.locks.Unlock(key)
 	return m.ttlKeys.Set(key, value)
 
 }
@@ -79,7 +79,7 @@ func (m *MemDb) DeleteTTL(key string) int {
 		dblog.Logger.Debugf("DeleteTTL key not exist key = %s,maybe is expired", key)
 	}
 	m.locks.Lock(key)
-	defer m.locks.UnLock(key)
+	defer m.locks.Unlock(key)
 	return m.ttlKeys.Delete(key)
 
 }

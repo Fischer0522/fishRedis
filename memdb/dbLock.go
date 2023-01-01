@@ -30,13 +30,14 @@ func (lock *Locks) GetKeyPos(key string) int {
 
 func (lock *Locks) Lock(key string) {
 	pos := lock.GetKeyPos(key)
+
 	if pos == -1 {
 		dblog.Logger.Errorf("Locks Lock key %s error: pos == -1", key)
 	}
 	lock.locks[pos].Lock()
 }
 
-func (lock *Locks) UnLock(key string) {
+func (lock *Locks) Unlock(key string) {
 	pos := lock.GetKeyPos(key)
 	if pos == -1 {
 		dblog.Logger.Errorf("Locks unlock key %s error : pos == -1", key)
@@ -63,6 +64,7 @@ func (lock *Locks) RUnlock(key string) {
 
 // when call LockMulti,call sortedLockPoses first sort the keys
 // to prevent the deadLock,lock keys from front to the end
+// use map to ensure only lock or unlock a slot once
 func (lock *Locks) sortedLockPoses(keys []string) []int {
 	set := make(map[int]struct{})
 	for _, key := range keys {
@@ -74,13 +76,15 @@ func (lock *Locks) sortedLockPoses(keys []string) []int {
 		set[pos] = struct{}{}
 
 	}
-	poses := make([]int, len(keys))
+
+	poses := make([]int, len(set))
 	i := 0
 	for index := range set {
 		poses[i] = index
 		i++
 	}
 	sort.Ints(poses)
+
 	return poses
 }
 func (lock *Locks) LockMulti(keys []string) {
@@ -92,7 +96,7 @@ func (lock *Locks) LockMulti(keys []string) {
 		lock.locks[pos].Lock()
 	}
 }
-func (lock *Locks) UnLockMulti(keys []string) {
+func (lock *Locks) UnlockMulti(keys []string) {
 	poses := lock.sortedLockPoses(keys)
 	if poses == nil {
 		return
@@ -110,7 +114,7 @@ func (lock *Locks) RLockMulti(keys []string) {
 		lock.locks[pos].RLock()
 	}
 }
-func (lock *Locks) RUnLockMulti(keys []string) {
+func (lock *Locks) RUnlockMulti(keys []string) {
 	poses := lock.sortedLockPoses(keys)
 	if poses == nil {
 		return
@@ -118,4 +122,32 @@ func (lock *Locks) RUnLockMulti(keys []string) {
 	for _, pos := range poses {
 		lock.locks[pos].RUnlock()
 	}
+}
+
+// just use for test
+func (lock *Locks) tryToGetLock(key string) bool {
+	pos := lock.GetKeyPos(key)
+	return lock.locks[pos].TryLock()
+}
+func (lock *Locks) tryToGetRLock(key string) bool {
+	pos := lock.GetKeyPos(key)
+	return lock.locks[pos].TryRLock()
+}
+func (lock *Locks) getLockCount() int {
+	result := 0
+	for _, l := range lock.locks {
+		if !l.TryLock() {
+			result++
+		}
+	}
+	return result
+}
+func (lock *Locks) getRLockCount() int {
+	result := 0
+	for _, l := range lock.locks {
+		if !l.TryRLock() {
+			result++
+		}
+	}
+	return result
 }
