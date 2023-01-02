@@ -327,3 +327,174 @@ func setNxString(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(int64(res))
 
 }
+
+func strLenString(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "strlen" {
+		dblog.Logger.Error("strLenString func :cmdName !=setlen")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) != 2 {
+		return resp.MakeErrorData("error: command is invalid")
+	}
+	key := string(cmd[1])
+	if !m.CheckTTL(key) {
+		return resp.MakeIntData(0)
+	}
+	m.locks.RLock(key)
+	val, ok := m.db.Get(key)
+	m.locks.RUnlock(key)
+	if !ok {
+		return resp.MakeIntData(0)
+	}
+	valWithType, typeOk := val.([]byte)
+	if !typeOk {
+		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	return resp.MakeIntData(int64(len(valWithType)))
+
+}
+
+func incrString(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "incr" {
+		dblog.Logger.Error("incrString func :cmdName != incr")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) != 2 {
+		return resp.MakeErrorData("error: command is invalid")
+	}
+	key := string(cmd[1])
+	m.CheckTTL(key)
+	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
+	val, ok := m.db.Get(key)
+	if !ok {
+		m.db.Set(key, []byte("1"))
+		return resp.MakeIntData(1)
+	}
+	valWithType, typeOk := val.([]byte)
+	if !typeOk {
+		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	intVal, err := strconv.ParseInt(string(valWithType), 10, 64)
+	if err != nil {
+		return resp.MakeErrorData("value is not an integer")
+	}
+	intVal++
+	// no need to deleteTTL
+	m.db.Set(key, []byte(strconv.FormatInt(intVal, 10)))
+	return resp.MakeIntData(intVal)
+
+}
+func incrByString(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "incrby" {
+		dblog.Logger.Error("incrByString func: cmdName != incrby")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) != 3 {
+		return resp.MakeErrorData("error: command is invalid")
+	}
+	key := string(cmd[1])
+	increment, err := strconv.ParseInt(string(cmd[2]), 10, 64)
+	if err != nil {
+		return resp.MakeErrorData("commands invalid: increment value is not an integer")
+	}
+	m.CheckTTL(key)
+	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
+	val, ok := m.db.Get(key)
+
+	var intVal int64
+	if !ok {
+		intVal = 0
+		intVal += increment
+		m.db.Set(key, []byte(strconv.FormatInt(intVal, 10)))
+		return resp.MakeIntData(intVal)
+	}
+	valWithType, typeOK := val.([]byte)
+	if !typeOK {
+		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	intVal, err = strconv.ParseInt(string(valWithType), 10, 64)
+	if err != nil {
+		return resp.MakeErrorData("value is not an integer")
+	}
+	intVal += increment
+	m.db.Set(key, []byte(strconv.FormatInt(intVal, 64)))
+	return resp.MakeIntData(intVal)
+}
+
+func decrString(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "decr" {
+		dblog.Logger.Error("decrString func:cmdName != decr")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) != 2 {
+		return resp.MakeErrorData("error: command is invalid")
+	}
+	key := string(cmd[1])
+	m.CheckTTL(key)
+	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
+	val, ok := m.db.Get(key)
+	var intVal int64
+	if !ok {
+		intVal = 0
+		intVal--
+		m.db.Set(key, []byte(strconv.FormatInt(intVal, 10)))
+		return resp.MakeIntData(intVal)
+	}
+	valWithType, typeOk := val.([]byte)
+	if !typeOk {
+		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	intVal, err := strconv.ParseInt(string(valWithType), 10, 64)
+	if err != nil {
+		return resp.MakeErrorData("value is not an integer")
+	}
+	intVal--
+	m.db.Set(key, []byte(strconv.FormatInt(intVal, 10)))
+	return resp.MakeIntData(intVal)
+}
+
+func decrByString(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "decrby" {
+		dblog.Logger.Error("decrByString func: cmdName!= decrby")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) != 3 {
+		return resp.MakeErrorData("error: command is invalid")
+	}
+	key := string(cmd[1])
+	decrement, err := strconv.ParseInt(string(cmd[2]), 10, 64)
+	if err != nil {
+		return resp.MakeErrorData("commands invalid: decrement value is not an integer")
+	}
+	m.CheckTTL(key)
+	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
+	val, ok := m.db.Get(key)
+	var intVal int64
+	if !ok {
+		intVal = 0
+		intVal -= decrement
+		m.db.Set(key, []byte(strconv.FormatInt(intVal, 10)))
+		return resp.MakeIntData(intVal)
+	}
+	valWithType, typeOk := val.([]byte)
+	if !typeOk {
+		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	intVal, err = strconv.ParseInt(string(valWithType), 10, 64)
+	if err != nil {
+		return resp.MakeErrorData("value is not an integer")
+	}
+	intVal -= decrement
+	m.db.Set(key, []byte(strconv.FormatInt(intVal, 10)))
+	return resp.MakeIntData(intVal)
+
+}
