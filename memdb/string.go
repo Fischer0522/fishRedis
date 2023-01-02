@@ -498,3 +498,88 @@ func decrByString(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(intVal)
 
 }
+
+func incrByFloatString(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "incrbyfloat" {
+		dblog.Logger.Error("incrByFloatString func: cmdName != incrbyfloat")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) != 3 {
+		return resp.MakeErrorData("commands is invalid")
+	}
+	key := string(cmd[1])
+	inc, err := strconv.ParseFloat(string(cmd[2]), 64)
+
+	if err != nil {
+		return resp.MakeErrorData("commands invalid increment value is not a float")
+	}
+	m.CheckTTL(key)
+
+	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
+	var floatVal float64
+	val, ok := m.db.Get(key)
+	if !ok {
+		floatVal += inc
+		m.db.Set(key, []byte(strconv.FormatFloat(floatVal, 'f', -1, 64)))
+		return resp.MakeBulkData([]byte(strconv.FormatFloat(inc, 'f', -1, 64)))
+	}
+	valWithType, ok := val.([]byte)
+	if !ok {
+		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	floatVal, err = strconv.ParseFloat(string(valWithType), 64)
+	if err != nil {
+		return resp.MakeErrorData("value is not a float")
+	}
+	floatVal += inc
+	m.db.Set(key, []byte(strconv.FormatFloat(floatVal, 'f', -1, 64)))
+	return resp.MakeBulkData([]byte(strconv.FormatFloat(floatVal, 'f', -1, 64)))
+
+}
+func appendString(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "append" {
+		dblog.Logger.Error("appendString func: cmdName != append")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) != 3 {
+		return resp.MakeErrorData("error: command is invalid")
+	}
+	key := string(cmd[1])
+	val := cmd[2]
+	m.CheckTTL(key)
+
+	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
+	oldVal, ok := m.db.Get(key)
+	if !ok {
+		m.db.Set(key, val)
+		return resp.MakeIntData(int64(len(val)))
+	}
+	oldvalWithType, typeOk := oldVal.([]byte)
+	if !typeOk {
+		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	newVal := append(oldvalWithType, val...)
+	m.db.Set(key, newVal)
+	return resp.MakeIntData(int64(len(newVal)))
+}
+
+func RegisterStringCommand() {
+	RegisterCommand("set", setString)
+	RegisterCommand("get", getString)
+	RegisterCommand("getrange", getRangeString)
+	RegisterCommand("setrange", setRangeString)
+	RegisterCommand("mget", mGetString)
+	RegisterCommand("mset", mSetString)
+	RegisterCommand("setex", setExString)
+	RegisterCommand("setnx", setNxString)
+	RegisterCommand("strlen", strLenString)
+	RegisterCommand("incr", incrString)
+	RegisterCommand("incrby", incrByString)
+	RegisterCommand("decr", decrString)
+	RegisterCommand("incrbyfloat", incrByFloatString)
+	RegisterCommand("append", appendString)
+}
