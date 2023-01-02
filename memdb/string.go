@@ -116,12 +116,13 @@ func getString(m *MemDb, cmd [][]byte) resp.RedisData {
 		return resp.MakeErrorData("error:commands is invalid")
 	}
 	key := string(cmd[1])
-	m.locks.RLock(key)
-	defer m.locks.RUnlock(key)
 	// checkTTL first,delete expired key
 	if !m.CheckTTL(key) {
 		return resp.MakeBulkData(nil)
 	}
+	m.locks.RLock(key)
+	defer m.locks.RUnlock(key)
+
 	val, ok := m.db.Get(key)
 	if !ok {
 		return resp.MakeBulkData(nil)
@@ -177,6 +178,9 @@ func getRangeString(m *MemDb, cmd [][]byte) resp.RedisData {
 	if start < 0 {
 		start = 0
 	}
+	if end > len(valWithType) {
+		end = len(valWithType)
+	}
 	return resp.MakeBulkData(valWithType[start:end])
 
 }
@@ -218,7 +222,13 @@ func setRangeString(m *MemDb, cmd [][]byte) resp.RedisData {
 		newVal = append(newVal, substr...)
 	} else {
 		newVal = oldValWithType[:offset]
+		tailIndex := offset + len(substr)
 		newVal = append(newVal, substr...)
+		if tailIndex < len(oldValWithType) {
+			tail := oldValWithType[offset+len(substr):]
+			newVal = append(newVal, tail...)
+		}
+
 	}
 	m.db.Set(key, newVal)
 	return resp.MakeIntData(int64(len(newVal)))
@@ -422,7 +432,7 @@ func incrByString(m *MemDb, cmd [][]byte) resp.RedisData {
 		return resp.MakeErrorData("value is not an integer")
 	}
 	intVal += increment
-	m.db.Set(key, []byte(strconv.FormatInt(intVal, 64)))
+	m.db.Set(key, []byte(strconv.FormatInt(intVal, 10)))
 	return resp.MakeIntData(intVal)
 }
 
@@ -580,6 +590,7 @@ func RegisterStringCommand() {
 	RegisterCommand("incr", incrString)
 	RegisterCommand("incrby", incrByString)
 	RegisterCommand("decr", decrString)
+	RegisterCommand("decrby", decrByString)
 	RegisterCommand("incrbyfloat", incrByFloatString)
 	RegisterCommand("append", appendString)
 }
