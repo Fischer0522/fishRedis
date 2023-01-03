@@ -45,6 +45,7 @@ func (r *StringData) ToBytes() []byte {
 func (r *StringData) Data() string {
 	return r.data
 }
+
 func (r *StringData) ByteData() []byte {
 	return []byte(r.data)
 }
@@ -58,6 +59,9 @@ func MakeBulkData(data []byte) *BulkData {
 }
 
 func (r *BulkData) ToBytes() []byte {
+	if r.data == nil {
+		return []byte("$-1\r\n")
+	}
 	return []byte("$" + strconv.Itoa(len(r.data)) + CRLF + string(r.data) + CRLF)
 }
 func (r *BulkData) Data() []byte {
@@ -99,6 +103,10 @@ func (r *ErrorData) ToBytes() []byte {
 }
 
 func (r *ErrorData) Data() string {
+	return r.data
+}
+
+func (r *ErrorData) Error() string {
 	return r.data
 }
 

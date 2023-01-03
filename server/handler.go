@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bufio"
 	"fishRedis/memdb"
 	"fmt"
 	"net"
@@ -18,4 +19,8 @@ func NewHandler() *Handler {
 
 func (h *Handler) handle(conn net.Conn) {
 	fmt.Println("handling")
+	input := bufio.NewScanner(conn)
+	for input.Scan() {
+		fmt.Println(input.Text())
+	}
 }
