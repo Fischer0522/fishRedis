@@ -212,7 +212,7 @@ func TestKeepTTL(t *testing.T) {
 
 	cmdKeepTTL := [][]byte{cmdName, key, newVal, keepttl}
 	res = setString(mem, cmdKeepTTL)
-	if !bytes.Equal(res.ToBytes(), []byte("+OK\r\n  ")) {
+	if !bytes.Equal(res.ToBytes(), []byte("+OK\r\n")) {
 		t.Error("set keepttl val failed")
 		fmt.Println(string(res.ToBytes()))
 	}
