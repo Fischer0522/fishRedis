@@ -33,39 +33,39 @@ func NewList() *List {
 	return list
 }
 
-func (list *List) Index(index int) *ListNode {
+func (list *List) index(index int) []byte {
 
 	if index < 0 {
 		if -index > list.Length {
 			return nil
 		}
-		currentNode := list.Tail
-		count := 0
+		currentNode := list.Tail.Prev
+		count := -1
 		for count > index {
 			count--
 			currentNode = currentNode.Prev
 		}
-		return currentNode
+		return currentNode.Val
 	} else {
 		if index >= list.Length {
 			return nil
 		}
-		currentNode := list.Head
+		currentNode := list.Head.Next
 		count := 0
 		for count < index {
 			count++
 			currentNode = currentNode.Next
 		}
-		return currentNode
+		return currentNode.Val
 	}
 
 }
 
 // if isBefore is true,insert the node before the target
 // else insert it after the target
-func (list *List) lInsert(isBefore bool, val []byte) int {
+func (list *List) lInsert(isBefore bool, val []byte, target []byte) int {
 	for currentNode := list.Head.Next; currentNode != list.Tail; currentNode = currentNode.Next {
-		if bytes.Equal(currentNode.Val, val) {
+		if bytes.Equal(currentNode.Val, target) {
 			newNode := &ListNode{}
 			newNode.Val = val
 			if isBefore {
@@ -121,14 +121,14 @@ func (list *List) rPush(val []byte) int {
 	list.Length++
 	return list.Length
 }
-func (list *List) rPop() int {
+func (list *List) rPop() []byte {
 	temp := list.Tail.Prev
 	temp.Prev.Next = list.Tail
 	list.Tail.Prev = temp.Prev
 	temp.Prev = nil
 	temp.Next = nil
 	list.Length--
-	return list.Length
+	return temp.Val
 }
 
 // when lPos return -1 it means can not find the val,
@@ -145,10 +145,11 @@ func (list *List) lPos(val []byte, rank int, maxLen int) int {
 				rankCount++
 			}
 		}
+		lenCount++
 		if lenCount >= maxLen {
 			return -1
 		}
-		lenCount++
+
 	}
 	return -1
 }
@@ -173,10 +174,10 @@ func (list *List) lRange(start int, end int) [][]byte {
 	result := make([][]byte, 0)
 	currentNode := list.Head.Next
 	for i := 0; i <= end; i++ {
-		currentNode = currentNode.Next
 		if i >= start {
 			result = append(result, currentNode.Val)
 		}
+		currentNode = currentNode.Next
 	}
 	return result
 }
@@ -231,8 +232,9 @@ func (list *List) deleteByVal(val []byte, count int) int {
 }
 func (list *List) set(val []byte, index int) bool {
 	if index >= 0 {
+
+		currentNode := list.Head.Next
 		for i := 0; i <= index; i++ {
-			currentNode := list.Head.Next
 			if currentNode == list.Tail {
 				return false
 			}
@@ -240,17 +242,19 @@ func (list *List) set(val []byte, index int) bool {
 				currentNode.Val = val
 				return true
 			}
+			currentNode = currentNode.Next
 		}
 	} else {
-		for i := 0; i > index; i++ {
-			currentNode := list.Tail
+		currentNode := list.Tail.Prev
+		for i := -1; i >= index; i-- {
 			if currentNode == list.Head {
 				return false
 			}
-			if i == index+1 {
+			if i == index {
 				currentNode.Val = val
 				return true
 			}
+			currentNode = currentNode.Prev
 		}
 	}
 	return false
@@ -291,10 +295,10 @@ func (list *List) trim(start int, end int) {
 	// break the list for gc and link the newList
 	list.Head.Next.Prev = nil
 	list.Tail.Prev.Next = nil
-	if startNode != nil {
+	if startNode.Prev != nil {
 		startNode.Prev.Next = nil
 	}
-	if endNode != nil {
+	if endNode.Next != nil {
 		endNode.Next.Prev = nil
 	}
 	list.Head.Next = startNode
