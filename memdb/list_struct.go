@@ -133,25 +133,67 @@ func (list *List) rPop() []byte {
 
 // when lPos return -1 it means can not find the val,
 // in list.go,return nil to the redis-cli
-// support param rank and maxLen
-func (list *List) lPos(val []byte, rank int, maxLen int) int {
-	rankCount := 1
+// support param rank,count and maxLen
+/*params:rank >0 or <0 when there is no rank in cmd [][]byte rank = 1 as default
+:count  = 1 as default
+:maxLen = list.Length as default means no limit*/
+func (list *List) lPos(val []byte, rank int, count int, maxLen int) []int {
+	// get all element without limit
+	if count == 0 {
+		count = list.Length
+	}
 	lenCount := 0
-	for currentNode := list.Head.Next; currentNode != list.Tail; currentNode = currentNode.Next {
-		if bytes.Equal(currentNode.Val, val) {
-			if rankCount == rank {
-				return lenCount
-			} else {
-				rankCount++
+	result := make([]int, 0)
+	if rank > 0 {
+		rankCount := 1
+		for currentNode := list.Head.Next; currentNode != list.Tail; currentNode = currentNode.Next {
+			if bytes.Equal(currentNode.Val, val) {
+				if rankCount >= rank {
+					if count > 0 {
+						result = append(result, lenCount)
+					}
+					count--
+
+				} else {
+					rankCount++
+				}
+
+			}
+			if count == 0 {
+				return result
+			}
+			lenCount++
+			if lenCount >= maxLen {
+				return result
+			}
+
+		}
+	} else {
+		rankCount := -1
+		for currentNode := list.Tail.Prev; currentNode != list.Head; currentNode = currentNode.Prev {
+			if bytes.Equal(currentNode.Val, val) {
+				if rankCount <= rank {
+					if count > 0 {
+						result = append(result, list.Length-lenCount-1)
+					}
+					count--
+				} else {
+					rankCount--
+				}
+			}
+			if count == 0 {
+				return result
+			}
+			lenCount++
+			if lenCount >= maxLen {
+				return result
 			}
 		}
-		lenCount++
-		if lenCount >= maxLen {
-			return -1
-		}
+		// rank must < 0 handle rank = 0 in list.go
 
 	}
-	return -1
+	// shouldn't reach here
+	return []int{}
 }
 
 // when the length of result is 0,list.go return "empty list or set" to redis-cli

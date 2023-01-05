@@ -159,3 +159,95 @@ func lPopList(m *MemDb, cmd [][]byte) resp.RedisData {
 	res := listVal.lPop()
 	return resp.MakeBulkData(res)
 }
+
+func rPushList(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "rpush" {
+		dblog.Logger.Error("rPushList func:cmdName != lpush")
+		return resp.MakeErrorData("server error")
+	}
+	length := len(cmd)
+	if length < 3 {
+		return resp.MakeErrorData("wrong number of arguments for 'rpush' command")
+	}
+	key := string(cmd[1])
+	m.CheckTTL(key)
+	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
+
+	val, ok := m.db.Get(key)
+	if !ok {
+		list := NewList()
+		m.db.Set(key, list)
+	}
+	// if key is not exist,get the empty list
+	val, _ = m.db.Get(key)
+	listVal, typeOk := val.(List)
+	if !typeOk {
+		return resp.MakeErrorData("WRONGTYPE Operation against a key holding thr wrong kind of value")
+	}
+	for i := 2; i < length; i++ {
+		listVal.rPush(cmd[i])
+	}
+	return resp.MakeIntData(int64(listVal.Length))
+}
+func rPopList(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "rpop" {
+		dblog.Logger.Error("rPopList func: cmdName != rpop")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) != 2 {
+		return resp.MakeErrorData("wrong number of arguments for 'rpop'")
+	}
+	key := string(cmd[1])
+	if !m.CheckTTL(key) {
+		return resp.MakeBulkData(nil)
+	}
+	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
+
+	val, ok := m.db.Get(key)
+	if !ok {
+		return resp.MakeBulkData(nil)
+	}
+	listVal, typeOk := val.(List)
+	if !typeOk {
+		return resp.MakeErrorData("WRONGTYPE Operation against a key holding thr wrong kind of value")
+	}
+	res := listVal.rPop()
+	return resp.MakeBulkData(res)
+}
+
+func rPushxList(m *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "rpushx" {
+		dblog.Logger.Error("rPushxList func : cmdName != rpushx")
+		return resp.MakeErrorData("server error")
+	}
+	length := len(cmd)
+	if length < 3 {
+		return resp.MakeErrorData("wrong number of arguments for 'rpushx' command")
+	}
+	key := string(cmd[1])
+	if !m.CheckTTL(key) {
+		return resp.MakeIntData(0)
+	}
+	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
+	val, ok := m.db.Get(key)
+	if !ok {
+		return resp.MakeIntData(0)
+	}
+	listVal, typeOk := val.(List)
+	if !typeOk {
+		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
+	}
+	for i := 2; i < length; i++ {
+		listVal.rPush(cmd[i])
+	}
+	return resp.MakeIntData(int64(listVal.Length))
+}
+func lPosList(m *MemDb, cmd [][]byte) resp.RedisData {
+	return resp.MakeErrorData("")
+}

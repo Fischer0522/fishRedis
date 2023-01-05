@@ -99,13 +99,15 @@ func TestIndex(t *testing.T) {
 	}
 
 }
+
+/*need a new test */
 func TestLPos(t *testing.T) {
 	list := NewList()
 	length := 10
 	generateNode(list, length)
 	for i := 0; i < length; i++ {
 		val := []byte(strconv.Itoa(i))
-		res := list.lPos(val, 1, 20)
+		res := list.lPos(val, 1, 1, 20)[0]
 		if res != length-i-1 {
 			t.Errorf("wrong pos,result:%d,expect:%d", res, length-1-i)
 		}
@@ -113,16 +115,52 @@ func TestLPos(t *testing.T) {
 	generateNode(list, length)
 	for i := 0; i < length; i++ {
 		val := []byte(strconv.Itoa(i))
-		res := list.lPos(val, 2, 30)
+		res := list.lPos(val, 2, 1, 30)[0]
 		if res != 2*length-i-1 {
 			t.Errorf("wrong pos,result:%d,expect:%d", res, length+i)
 		}
-		resLimit := list.lPos(val, 2, 10)
-		if resLimit != -1 {
+		resLimit := list.lPos(val, 2, 1, 10)
+		if len(resLimit) != 0 {
 			t.Errorf("ignore the maxLen limit")
 		}
 
 	}
+	list.Clear()
+	inputList := []string{"a", "b", "c", "1", "2", "3", "c", "c"}
+	for _, ele := range inputList {
+		list.rPush([]byte(ele))
+	}
+	res := list.lPos([]byte("c"), 1, 1, list.Length)[0]
+	if res != 2 {
+		t.Errorf("get wrong pos")
+	}
+	res = list.lPos([]byte("c"), -1, 1, list.Length)[0]
+	if res != 7 {
+		t.Errorf("get wrong pos,result:%d,expect:%d", res, 7)
+	}
+	resArr := list.lPos([]byte("c"), -1, 2, list.Length)
+	if resArr[0] != 7 || resArr[1] != 6 {
+		t.Errorf("get wrong pos,result:%v,expect:[7,6]", resArr)
+	}
+	resArr = list.lPos([]byte("c"), 1, 2, list.Length)
+	if resArr[0] != 2 || resArr[1] != 6 {
+		t.Errorf("get wrong pos,result:%v,expect:[2,6]", resArr)
+	}
+	resArr = list.lPos([]byte("c"), 1, 0, list.Length)
+	if resArr[0] != 2 || resArr[1] != 6 || resArr[2] != 7 {
+		t.Errorf("get wrong pos, result:%v,expect:[2:6,7]", resArr)
+	}
+
+	list.Clear()
+	inputList = []string{"a", "b", "c", "d", "1", "2", "3", "4", "3", "3", "3"}
+	for _, ele := range inputList {
+		list.rPush([]byte(ele))
+	}
+	resArr = list.lPos([]byte("3"), -1, 3, list.Length)
+	if len(resArr) != 3 || resArr[0] != 10 || resArr[1] != 9 || resArr[2] != 8 {
+		t.Errorf("get wrong pos,result:%v,expect:[10,9,8]", resArr)
+	}
+
 }
 
 func TestInsert(t *testing.T) {
@@ -135,7 +173,7 @@ func TestInsert(t *testing.T) {
 	list.lInsert(true, beforeVal, target)
 	list.lInsert(false, afterVal, target)
 
-	pos := list.lPos(target, 1, 20)
+	pos := list.lPos(target, 1, 1, 20)[0]
 	beforeResult := list.index(pos - 1)
 	afterResult := list.index(pos + 1)
 	if !bytes.Equal(beforeVal, beforeResult) {
@@ -205,8 +243,8 @@ func TestDeleteByVal(t *testing.T) {
 	// test deleteAll
 	target := []byte(strconv.Itoa(2))
 	list.deleteByVal(target, 0)
-	res := list.lPos(target, 1, length)
-	if res != -1 {
+	res := list.lPos(target, 1, 1, length)
+	if len(res) != 0 {
 		t.Errorf("delete all failed")
 	}
 	list = NewList()
@@ -215,8 +253,8 @@ func TestDeleteByVal(t *testing.T) {
 	generateNodeR(list, length)
 	count := -2
 	list.deleteByVal(target, count)
-	res = list.lPos(target, 1, 3*length)
-	if res != 2 {
+	res1 := list.lPos(target, 1, 1, 3*length)[0]
+	if res1 != 2 {
 		t.Errorf("wrong pos result:%d expect %d", res, 2)
 	}
 	list = NewList()
@@ -225,8 +263,8 @@ func TestDeleteByVal(t *testing.T) {
 	generateNodeR(list, length)
 	count = 2
 	list.deleteByVal(target, count)
-	res = list.lPos(target, 1, 3*length)
-	if res != 20 {
+	res1 = list.lPos(target, 1, 1, 3*length)[0]
+	if res1 != 20 {
 		t.Errorf("wrong pos reslut:%d,expect %d", res, 20)
 	}
 
@@ -246,7 +284,7 @@ func TestSet(t *testing.T) {
 		t.Errorf("set failed")
 		printAllElement(list)
 	}
-	pos := list.lPos(target, 1, length)
+	pos := list.lPos(target, 1, 1, length)[0]
 	if pos != length/2 {
 		t.Errorf("set pos wrong")
 		printAllElement(list)
@@ -268,7 +306,7 @@ func TestSet(t *testing.T) {
 	if !res {
 		t.Errorf("set negative index failed")
 	}
-	pos = list.lPos(target, 1, length)
+	pos = list.lPos(target, 1, 1, length)[0]
 	if pos != length-3 {
 		t.Errorf("set negative index failed")
 
