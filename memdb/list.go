@@ -502,6 +502,7 @@ func lTrimList(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeStringData("OK")
 }
 
+// TODO BLMOVE BLPOP BRPOP LMOVE
 func RegisterListCommands() {
 	RegisterCommand("llen", lLenList)
 	RegisterCommand("lindex", lIndexList)

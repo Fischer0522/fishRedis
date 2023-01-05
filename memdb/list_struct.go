@@ -63,7 +63,7 @@ func (list *List) index(index int) []byte {
 
 // if isBefore is true,insert the node before the target
 // else insert it after the target
-func (list *List) lInsert(isBefore bool, val []byte, target []byte) int {
+func (list *List) lInsert(isBefore bool, target []byte, val []byte) int {
 	for currentNode := list.Head.Next; currentNode != list.Tail; currentNode = currentNode.Next {
 		if bytes.Equal(currentNode.Val, target) {
 			newNode := &ListNode{}
