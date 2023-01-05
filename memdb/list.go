@@ -479,7 +479,7 @@ func lTrimList(m *MemDb, cmd [][]byte) resp.RedisData {
 	if !m.CheckTTL(key) {
 		return resp.MakeBulkData([]byte("empty list or set"))
 	}
-	start, err := strconv.Atoi(string(cmd[3]))
+	start, err := strconv.Atoi(string(cmd[2]))
 	if err != nil {
 		return resp.MakeErrorData("value is not an integer or out of range")
 	}
