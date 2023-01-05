@@ -160,6 +160,10 @@ func TestLPos(t *testing.T) {
 	if len(resArr) != 3 || resArr[0] != 10 || resArr[1] != 9 || resArr[2] != 8 {
 		t.Errorf("get wrong pos,result:%v,expect:[10,9,8]", resArr)
 	}
+	resArr = list.lPos([]byte("3"), 1, 100, list.Length)
+	if len(resArr) != 4 || resArr[0] != 6 || resArr[1] != 8 || resArr[2] != 9 || resArr[3] != 10 {
+		t.Errorf("get wrong pos,result:%v,expect:[6,8,9,10]", resArr)
+	}
 
 }
 

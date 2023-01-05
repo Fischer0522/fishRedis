@@ -131,7 +131,7 @@ func (list *List) rPop() []byte {
 	return temp.Val
 }
 
-// when lPos return -1 it means can not find the val,
+// when lPos return empty slice it means can not find the val,
 // in list.go,return nil to the redis-cli
 // support param rank,count and maxLen
 /*params:rank >0 or <0 when there is no rank in cmd [][]byte rank = 1 as default
@@ -192,8 +192,8 @@ func (list *List) lPos(val []byte, rank int, count int, maxLen int) []int {
 		// rank must < 0 handle rank = 0 in list.go
 
 	}
-	// shouldn't reach here
-	return []int{}
+	// when count is out of range will reach here
+	return result
 }
 
 // when the length of result is 0,list.go return "empty list or set" to redis-cli
@@ -299,6 +299,7 @@ func (list *List) set(val []byte, index int) bool {
 			currentNode = currentNode.Prev
 		}
 	}
+	// shouldn't reach here
 	return false
 }
 
