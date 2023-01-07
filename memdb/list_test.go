@@ -387,7 +387,7 @@ func TestLRemList(t *testing.T) {
 
 	// clear the db
 	mem = NewMemdb()
-	// use rpush to init list 3 times
+	// use rpush to init list 4 times
 	cmd = NewCommand("rpush", "list", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
 	res = rPushList(mem, cmd)
 	rPushList(mem, cmd)
