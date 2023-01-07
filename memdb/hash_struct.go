@@ -50,7 +50,7 @@ func (h *Hash) Len() int {
 	return len(h.table)
 }
 
-func (h *Hash) STRLEN(key string) int {
+func (h *Hash) Strlen(key string) int {
 	val, ok := h.table[key]
 	if !ok {
 		return 0
@@ -89,6 +89,7 @@ func (h *Hash) IncrByFloat(key string, inc float64) (float64, error) {
 
 // Scan TODO implement HSCAN
 // count is just a hint
+// need to implement an iterator first
 //func (h *Hash) Scan(cursor int, count int) {
 //
 //}
