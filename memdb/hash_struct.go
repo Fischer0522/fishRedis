@@ -12,15 +12,21 @@ func NewHash() *Hash {
 	}
 }
 
-func (h *Hash) Set(key string, val []byte) {
+func (h *Hash) Set(key string, val []byte) int {
+	count := 0
+	_, ok := h.table[key]
+	if !ok {
+		count = 1
+	}
 	h.table[key] = val
+	return count
 }
 
 // Get return empty byte slice ,return a nil to redis-cli
 func (h *Hash) Get(key string) []byte {
 	val, ok := h.table[key]
 	if !ok {
-		return []byte{}
+		return nil
 	}
 	return val
 }
