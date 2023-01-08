@@ -4,6 +4,7 @@ import (
 	"fishRedis/dblog"
 	"fishRedis/memdb"
 	"fishRedis/resp"
+	"fmt"
 	"io"
 	"net"
 )
@@ -31,7 +32,8 @@ func (h *Handler) handle(conn net.Conn) {
 			if parsedRes.Err == io.EOF {
 				dblog.Logger.Info("Close connection ", conn.RemoteAddr().String())
 			} else {
-				dblog.Logger.Panic("handle connection ", conn.RemoteAddr().String())
+				fmt.Println("wrong")
+				//	dblog.Logger.Panic("handle connection ", conn.RemoteAddr().String())
 			}
 			return
 		}

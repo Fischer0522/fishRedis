@@ -12,6 +12,7 @@ import (
 func init() {
 	memdb.RegisterStringCommand()
 	memdb.RegisterListCommands()
+	memdb.RegisterHashCommand()
 }
 func main() {
 	dblog.InitLogger()
