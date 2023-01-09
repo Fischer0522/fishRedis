@@ -27,7 +27,7 @@ func hGetHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	if !ok {
 		return resp.MakeBulkData(nil)
 	}
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -56,7 +56,7 @@ func hSetHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 		mem.db.Set(key, newHash)
 	}
 	temp, _ := mem.db.Get(key)
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -89,7 +89,7 @@ func hDelHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	if !ok {
 		return resp.MakeIntData(0)
 	}
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -121,7 +121,7 @@ func hMgetHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	if !ok {
 		return resp.MakeBulkData(nil)
 	}
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -155,7 +155,7 @@ func hSetnxHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 		mem.db.Set(key, hash)
 	}
 	temp, _ := mem.db.Get(key)
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -187,7 +187,7 @@ func hExistsHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	if !ok {
 		return resp.MakeIntData(0)
 	}
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -217,7 +217,7 @@ func hGetAllHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	if !ok {
 		return resp.MakeBulkData([]byte("(empty list or set)"))
 	}
-	hash, typeok := temp.(*Hash)
+	hash, typeok := temp.(Hash)
 	if !typeok {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -256,7 +256,7 @@ func hIncrByHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 		mem.db.Set(key, hash)
 	}
 	temp, _ := mem.db.Get(key)
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -291,7 +291,7 @@ func hIncrByFloatHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 		mem.db.Set(key, hash)
 	}
 	temp, _ := mem.db.Get(key)
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -320,7 +320,7 @@ func hKeysHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	if !ok {
 		return resp.MakeBulkData([]byte("(empty list or set)"))
 	}
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -355,7 +355,7 @@ func hValsHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	if !ok {
 		return resp.MakeBulkData([]byte("(empty list or set)"))
 	}
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -389,7 +389,7 @@ func hLenHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	if !ok {
 		return resp.MakeIntData(0)
 	}
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
@@ -415,7 +415,7 @@ func hStrLenHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	if !ok {
 		return resp.MakeIntData(0)
 	}
-	hash, typeOk := temp.(*Hash)
+	hash, typeOk := temp.(Hash)
 	if !typeOk {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
