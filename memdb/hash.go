@@ -212,7 +212,7 @@ func hGetAllHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 		return resp.MakeBulkData([]byte("(empty list or set)"))
 	}
 	mem.locks.RLock(key)
-	defer mem.locks.Unlock(key)
+	defer mem.locks.RUnlock(key)
 	temp, ok := mem.db.Get(key)
 	if !ok {
 		return resp.MakeBulkData([]byte("(empty list or set)"))
