@@ -4,7 +4,6 @@ import (
 	"fishRedis/dblog"
 	"fishRedis/memdb"
 	"fishRedis/resp"
-	"fmt"
 	"io"
 	"net"
 )
@@ -25,6 +24,8 @@ func (h *Handler) handle(conn net.Conn) {
 		if err != nil {
 			dblog.Logger.Error(err)
 		}
+		if er := recover(); er != nil {
+		}
 	}()
 	ch := resp.ParseStream(conn)
 	for parsedRes := range ch {
@@ -32,17 +33,18 @@ func (h *Handler) handle(conn net.Conn) {
 			if parsedRes.Err == io.EOF {
 				dblog.Logger.Info("Close connection ", conn.RemoteAddr().String())
 			} else {
-				fmt.Println("wrong")
-				//	dblog.Logger.Panic("handle connection ", conn.RemoteAddr().String())
+				dblog.Logger.Panic("handle connection ", conn.RemoteAddr().String(), "panic:", parsedRes.Err.Error())
 			}
 			return
 		}
 		if parsedRes.Data == nil {
 			dblog.Logger.Error("empty parsedRes.Data from ", conn.RemoteAddr().String())
+
 		}
 		arrayData, ok := parsedRes.Data.(*resp.ArrayData)
 		if !ok {
 			dblog.Logger.Error("parsedRes.Data is not ArrayData from ", conn.RemoteAddr().String())
+			continue
 		}
 		cmd := arrayData.ToCommand()
 		res := h.memdb.ExecCommand(cmd)
