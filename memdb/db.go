@@ -41,6 +41,7 @@ func (m *MemDb) ExecCommand(cmd [][]byte) resp.RedisData {
 // if the key is expired,return false
 func (m *MemDb) CheckTTL(key string) bool {
 	m.locks.Lock(key)
+	defer m.locks.Unlock(key)
 	ttl, ok := m.ttlKeys.Get(key)
 	if !ok {
 		return true
@@ -51,7 +52,7 @@ func (m *MemDb) CheckTTL(key string) bool {
 		return true
 	}
 	// expired now delete it
-	defer m.locks.Unlock(key)
+
 	m.ttlKeys.Delete(key)
 	m.db.Delete(key)
 	return false

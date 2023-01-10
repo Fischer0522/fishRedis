@@ -3,6 +3,7 @@ package memdb
 import (
 	"fishRedis/dblog"
 	"fishRedis/resp"
+	"github.com/gobwas/glob"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -52,7 +53,7 @@ func existsKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 		return resp.MakeErrorData("wrong number of arguments for 'exists' command")
 	}
 	count := 0
-	for i := 0; i < len(cmd[i]); i++ {
+	for i := 1; i < len(cmd); i++ {
 		key := strings.ToLower(string(cmd[i]))
 		mem.CheckTTL(key)
 		mem.locks.RLock(key)
@@ -125,7 +126,29 @@ func expireKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 
 // TODO after finish the glob parse
 func keysKey(mem *MemDb, cmd [][]byte) resp.RedisData {
-	return resp.MakeErrorData("")
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "keys" {
+		dblog.Logger.Error("keysKey func: cmdName != keys")
+		return resp.MakeErrorData("server error")
+	}
+	if len(cmd) != 2 {
+		return resp.MakeErrorData("wrong number of arguments for 'keys' command")
+	}
+	pattern := string(cmd[1])
+	var g glob.Glob
+	g = glob.MustCompile(pattern)
+	allKeys := mem.db.Keys()
+	res := make([]resp.RedisData, 0)
+	for _, key := range allKeys {
+		if !mem.CheckTTL(key) {
+			continue
+		}
+		if g.Match(key) {
+			res = append(res, resp.MakeBulkData([]byte(key)))
+		}
+	}
+
+	return resp.MakeArrayData(res)
 }
 
 func persistKey(mem *MemDb, cmd [][]byte) resp.RedisData {
@@ -242,4 +265,50 @@ func ttlKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	now := time.Now().Unix()
 	return resp.MakeIntData(ttl.(int64) - now)
+}
+
+// support string,list,hash,set
+func typeKey(mem *MemDb, cmd [][]byte) resp.RedisData {
+	cmdName := strings.ToLower(string(cmd[0]))
+	if cmdName != "type" {
+		dblog.Logger.Error("typeKey func: cmdName != type")
+	}
+	if len(cmd) != 2 {
+		return resp.MakeErrorData("wrong number of arguments for 'type' command")
+	}
+	key := string(cmd[1])
+	if !mem.CheckTTL(key) {
+		return resp.MakeStringData("none")
+	}
+	mem.locks.RLock(key)
+	defer mem.locks.RUnlock(key)
+	val, ok := mem.db.Get(key)
+	if !ok {
+		return resp.MakeStringData("none")
+	}
+	switch val.(type) {
+	case []byte:
+		return resp.MakeStringData("string")
+	case Set:
+		return resp.MakeStringData("set")
+	case *List:
+		return resp.MakeStringData("list")
+	case Hash:
+		return resp.MakeStringData("Hash")
+	default:
+		return resp.MakeStringData("only support string,list,set and hash")
+	}
+}
+
+func RegisterKeyCommand() {
+	RegisterCommand("ping", pingKey)
+	RegisterCommand("del", delKey)
+	RegisterCommand("exists", existsKey)
+	RegisterCommand("expire", expireKey)
+	RegisterCommand("keys", keysKey)
+	RegisterCommand("persist", persistKey)
+	RegisterCommand("randomkey", randomKey)
+	RegisterCommand("rename", renameKey)
+	RegisterCommand("ttl", ttlKey)
+	RegisterCommand("type", typeKey)
 }

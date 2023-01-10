@@ -24,8 +24,9 @@ func (h *Handler) handle(conn net.Conn) {
 		if err != nil {
 			dblog.Logger.Error(err)
 		}
-		if er := recover(); er != nil {
-		}
+		//if er := recover(); er != nil {
+		//	fmt.Println(er)
+		//}
 	}()
 	ch := resp.ParseStream(conn)
 	for parsedRes := range ch {
