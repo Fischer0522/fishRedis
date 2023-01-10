@@ -157,6 +157,12 @@ func lPopList(m *MemDb, cmd [][]byte) resp.RedisData {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding thr wrong kind of value")
 	}
 	res := listVal.lPop()
+	defer func() {
+		if listVal.Length == 0 {
+			m.DeleteTTL(key)
+			m.db.Delete(key)
+		}
+	}()
 	return resp.MakeBulkData(res)
 }
 
@@ -216,6 +222,12 @@ func rPopList(m *MemDb, cmd [][]byte) resp.RedisData {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding thr wrong kind of value")
 	}
 	res := listVal.rPop()
+	defer func() {
+		if listVal.Length == 0 {
+			m.DeleteTTL(key)
+			m.db.Delete(key)
+		}
+	}()
 	return resp.MakeBulkData(res)
 }
 
@@ -427,6 +439,13 @@ func lRemList(m *MemDb, cmd [][]byte) resp.RedisData {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
 	res := listVal.deleteByVal(element, count)
+
+	defer func() {
+		if listVal.Length == 0 {
+			m.DeleteTTL(key)
+			m.db.Delete(key)
+		}
+	}()
 	return resp.MakeIntData(int64(res))
 }
 func lSetList(m *MemDb, cmd [][]byte) resp.RedisData {

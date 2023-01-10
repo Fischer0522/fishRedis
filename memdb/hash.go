@@ -99,6 +99,12 @@ func hDelHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 		num := hash.Del(keyToDel)
 		count += num
 	}
+	defer func() {
+		if hash.Len() == 0 {
+			mem.DeleteTTL(key)
+			mem.db.Delete(key)
+		}
+	}()
 	return resp.MakeIntData(int64(count))
 }
 

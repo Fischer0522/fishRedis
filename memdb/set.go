@@ -101,6 +101,12 @@ func sPopSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 		set.sDelete(setKey)
 		result = append(result, resp.MakeBulkData([]byte(setKey)))
 	}
+	defer func() {
+		if set.sLen() == 0 {
+			mem.DeleteTTL(key)
+			mem.db.Delete(key)
+		}
+	}()
 	return resp.MakeArrayData(result)
 }
 
@@ -172,6 +178,12 @@ func sRemSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 		res := set.sDelete(string(cmd[i]))
 		count += res
 	}
+	defer func() {
+		if set.sLen() == 0 {
+			mem.DeleteTTL(key)
+			mem.db.Delete(key)
+		}
+	}()
 	return resp.MakeIntData(int64(count))
 }
 
@@ -220,6 +232,12 @@ func sMoveSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	sourceSet.sDelete(member)
 	desSet.sAdd(member)
+	defer func() {
+		if sourceSet.sLen() == 0 {
+			mem.DeleteTTL(source)
+			mem.db.Delete(source)
+		}
+	}()
 	return resp.MakeIntData(1)
 }
 
