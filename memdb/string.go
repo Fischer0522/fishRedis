@@ -9,15 +9,19 @@ import (
 	"time"
 )
 
-func setString(m *MemDb, cmd [][]byte) resp.RedisData {
+func setString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "set" {
 		dblog.Logger.Error("setString func: cmdName != set")
+
 		return resp.MakeErrorData("Server error")
+
 	}
 	if len(cmd) < 3 {
 		dblog.Logger.Error("invalid length for set command")
-		return resp.MakeErrorData("error: commands is invalid")
+		client.OutputBuf = resp.MakeErrorData("error: commands is invalid")
 	}
 	m.CheckTTL(string(cmd[1]))
 	var err error
@@ -39,11 +43,13 @@ func setString(m *MemDb, cmd [][]byte) resp.RedisData {
 			i++
 			if i >= len(cmd) {
 				return resp.MakeErrorData("error:commands is invalid")
+
 			}
 			exTime := cmd[i]
 			exval, err = strconv.ParseInt(string(cmd[i]), 10, 64)
 			if err != nil {
 				return resp.MakeErrorData(fmt.Sprintf("error: commands is invalid %s is not an integer", exTime))
+
 			}
 		case "keepttl":
 			keepttl = true
@@ -54,6 +60,7 @@ func setString(m *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	if (nx && xx) || (ex && keepttl) {
 		return resp.MakeErrorData("error:command is invalid")
+
 	}
 	m.locks.Lock(key)
 	defer m.locks.Unlock(key)
@@ -92,8 +99,10 @@ func setString(m *MemDb, cmd [][]byte) resp.RedisData {
 	if get {
 		if !oldOk {
 			return resp.MakeBulkData(nil)
+
 		} else {
 			return resp.MakeBulkData(oldvalWithType)
+
 		}
 	}
 	if !keepttl {
@@ -104,9 +113,12 @@ func setString(m *MemDb, cmd [][]byte) resp.RedisData {
 		m.SetTTL(key, ttlTime)
 	}
 	return res
+
 }
 
-func getString(m *MemDb, cmd [][]byte) resp.RedisData {
+func getString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "get" {
 		dblog.Logger.Error("GetString func:cmdName != get")
@@ -114,10 +126,12 @@ func getString(m *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	if len(cmd) != 2 {
 		return resp.MakeErrorData("error:commands is invalid")
+
 	}
 	key := string(cmd[1])
 	// checkTTL first,delete expired key
 	if !m.CheckTTL(key) {
+		client.OutputBuf = resp.MakeBulkData(nil)
 		return resp.MakeBulkData(nil)
 	}
 	m.locks.RLock(key)
@@ -134,7 +148,9 @@ func getString(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeBulkData(valWithType)
 }
 
-func getRangeString(m *MemDb, cmd [][]byte) resp.RedisData {
+func getRangeString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "getrange" {
 		dblog.Logger.Error("getRangeString func:cmdName != getrange")
@@ -184,7 +200,9 @@ func getRangeString(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeBulkData(valWithType[start:end])
 
 }
-func setRangeString(m *MemDb, cmd [][]byte) resp.RedisData {
+func setRangeString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "setrange" {
 		dblog.Logger.Error("setRangeString func: cmdName != setrange")
@@ -233,7 +251,9 @@ func setRangeString(m *MemDb, cmd [][]byte) resp.RedisData {
 	m.db.Set(key, newVal)
 	return resp.MakeIntData(int64(len(newVal)))
 }
-func mGetString(m *MemDb, cmd [][]byte) resp.RedisData {
+func mGetString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "mget" {
 		dblog.Logger.Error("mGetString func:cmdName != mget")
@@ -268,7 +288,9 @@ func mGetString(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeArrayData(res)
 }
 
-func mSetString(m *MemDb, cmd [][]byte) resp.RedisData {
+func mSetString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "mset" {
 		dblog.Logger.Error("mSetString func:cmdName != mset")
@@ -295,7 +317,9 @@ func mSetString(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeStringData("OK")
 }
 
-func setExString(m *MemDb, cmd [][]byte) resp.RedisData {
+func setExString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "setex" {
 		dblog.Logger.Error("setExString func:cmdName != setex")
@@ -319,7 +343,9 @@ func setExString(m *MemDb, cmd [][]byte) resp.RedisData {
 	m.ttlKeys.Set(key, newTTL)
 	return resp.MakeStringData("OK")
 }
-func setNxString(m *MemDb, cmd [][]byte) resp.RedisData {
+func setNxString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "setnx" {
 		dblog.Logger.Error("setNxString func:cmdName != setnx")
@@ -338,7 +364,9 @@ func setNxString(m *MemDb, cmd [][]byte) resp.RedisData {
 
 }
 
-func strLenString(m *MemDb, cmd [][]byte) resp.RedisData {
+func strLenString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "strlen" {
 		dblog.Logger.Error("strLenString func :cmdName !=setlen")
@@ -365,7 +393,9 @@ func strLenString(m *MemDb, cmd [][]byte) resp.RedisData {
 
 }
 
-func incrString(m *MemDb, cmd [][]byte) resp.RedisData {
+func incrString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "incr" {
 		dblog.Logger.Error("incrString func :cmdName != incr")
@@ -397,7 +427,9 @@ func incrString(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(intVal)
 
 }
-func incrByString(m *MemDb, cmd [][]byte) resp.RedisData {
+func incrByString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "incrby" {
 		dblog.Logger.Error("incrByString func: cmdName != incrby")
@@ -436,7 +468,9 @@ func incrByString(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(intVal)
 }
 
-func decrString(m *MemDb, cmd [][]byte) resp.RedisData {
+func decrString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "decr" {
 		dblog.Logger.Error("decrString func:cmdName != decr")
@@ -470,7 +504,9 @@ func decrString(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(intVal)
 }
 
-func decrByString(m *MemDb, cmd [][]byte) resp.RedisData {
+func decrByString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "decrby" {
 		dblog.Logger.Error("decrByString func: cmdName!= decrby")
@@ -509,7 +545,9 @@ func decrByString(m *MemDb, cmd [][]byte) resp.RedisData {
 
 }
 
-func incrByFloatString(m *MemDb, cmd [][]byte) resp.RedisData {
+func incrByFloatString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "incrbyfloat" {
 		dblog.Logger.Error("incrByFloatString func: cmdName != incrbyfloat")
@@ -548,7 +586,9 @@ func incrByFloatString(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeBulkData([]byte(strconv.FormatFloat(floatVal, 'f', -1, 64)))
 
 }
-func appendString(m *MemDb, cmd [][]byte) resp.RedisData {
+func appendString(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "append" {
 		dblog.Logger.Error("appendString func: cmdName != append")

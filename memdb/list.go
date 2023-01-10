@@ -7,7 +7,9 @@ import (
 	"strings"
 )
 
-func lIndexList(m *MemDb, cmd [][]byte) resp.RedisData {
+func lIndexList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "lindex" {
 		dblog.Logger.Error("lIndex func:cmdName != lindex")
@@ -43,7 +45,9 @@ func lIndexList(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeBulkData(res)
 }
 
-func lLenList(m *MemDb, cmd [][]byte) resp.RedisData {
+func lLenList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "llen" {
 		dblog.Logger.Error("lLenList func :cmdName != llen")
@@ -70,7 +74,9 @@ func lLenList(m *MemDb, cmd [][]byte) resp.RedisData {
 
 }
 
-func lPushList(m *MemDb, cmd [][]byte) resp.RedisData {
+func lPushList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "lpush" {
 		dblog.Logger.Error("lPushList func:cmdName != lpush")
@@ -102,7 +108,9 @@ func lPushList(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(int64(listVal.Length))
 }
 
-func lPushxList(m *MemDb, cmd [][]byte) resp.RedisData {
+func lPushxList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "lpushx" {
 		dblog.Logger.Error("lPushxList func : cmdName != lpushx")
@@ -132,7 +140,9 @@ func lPushxList(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(int64(listVal.Length))
 }
 
-func lPopList(m *MemDb, cmd [][]byte) resp.RedisData {
+func lPopList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "lpop" {
 		dblog.Logger.Error("lPopList func: cmdName != lpop")
@@ -166,7 +176,9 @@ func lPopList(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeBulkData(res)
 }
 
-func rPushList(m *MemDb, cmd [][]byte) resp.RedisData {
+func rPushList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "rpush" {
 		dblog.Logger.Error("rPushList func:cmdName != lpush")
@@ -197,7 +209,9 @@ func rPushList(m *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	return resp.MakeIntData(int64(listVal.Length))
 }
-func rPopList(m *MemDb, cmd [][]byte) resp.RedisData {
+func rPopList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "rpop" {
 		dblog.Logger.Error("rPopList func: cmdName != rpop")
@@ -231,7 +245,9 @@ func rPopList(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeBulkData(res)
 }
 
-func rPushxList(m *MemDb, cmd [][]byte) resp.RedisData {
+func rPushxList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "rpushx" {
 		dblog.Logger.Error("rPushxList func : cmdName != rpushx")
@@ -260,7 +276,9 @@ func rPushxList(m *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	return resp.MakeIntData(int64(listVal.Length))
 }
-func lPosList(m *MemDb, cmd [][]byte) resp.RedisData {
+func lPosList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "lpos" {
 		dblog.Logger.Error("lPosList func:cmdName != lpos")
@@ -333,7 +351,9 @@ func lPosList(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeArrayData(res)
 
 }
-func lInsertList(m *MemDb, cmd [][]byte) resp.RedisData {
+func lInsertList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "linsert" {
 		dblog.Logger.Error("lInsertList func:cmdName != linsert")
@@ -369,7 +389,9 @@ func lInsertList(m *MemDb, cmd [][]byte) resp.RedisData {
 	res := listVal.lInsert(isBefore, pivot, element)
 	return resp.MakeIntData(int64(res))
 }
-func lRangeList(m *MemDb, cmd [][]byte) resp.RedisData {
+func lRangeList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "lrange" {
 		dblog.Logger.Error("lRangeList func:cmdName != lrange")
@@ -410,7 +432,9 @@ func lRangeList(m *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	return resp.MakeArrayData(resData)
 }
-func lRemList(m *MemDb, cmd [][]byte) resp.RedisData {
+func lRemList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "lrem" {
 		dblog.Logger.Error("lRemList func:cmdName != lrem")
@@ -448,7 +472,9 @@ func lRemList(m *MemDb, cmd [][]byte) resp.RedisData {
 	}()
 	return resp.MakeIntData(int64(res))
 }
-func lSetList(m *MemDb, cmd [][]byte) resp.RedisData {
+func lSetList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "lset" {
 		dblog.Logger.Error("lSetList func:cmdName != lset")
@@ -485,7 +511,9 @@ func lSetList(m *MemDb, cmd [][]byte) resp.RedisData {
 
 }
 
-func lTrimList(m *MemDb, cmd [][]byte) resp.RedisData {
+func lTrimList(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	m := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "ltrim" {
 		dblog.Logger.Error("lTrimList func:cmdName != ltrim")
@@ -521,7 +549,7 @@ func lTrimList(m *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeStringData("OK")
 }
 
-// TODO BLMOVE BLPOP BRPOP LMOVE
+//// TODO BLMOVE BLPOP BRPOP LMOVE
 func RegisterListCommands() {
 	RegisterCommand("llen", lLenList)
 	RegisterCommand("lindex", lIndexList)

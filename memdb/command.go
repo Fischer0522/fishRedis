@@ -1,17 +1,34 @@
 package memdb
 
-import "fishRedis/resp"
+import (
+	"fishRedis/resp"
+	"net"
+)
 
-var cmdTable = make(map[string]*command)
+var CmdTable = make(map[string]*CmdExecutor)
 
-type cmdExecutor func(m *MemDb, cmd [][]byte) resp.RedisData
+type CmdExecutor func(client *RedisClient) resp.RedisData
 
-type command struct {
-	executor cmdExecutor
+func RegisterCommand(cmdName string, executor CmdExecutor) {
+	CmdTable[cmdName] = &executor
 }
 
-func RegisterCommand(cmdName string, executor cmdExecutor) {
-	cmdTable[cmdName] = &command{
-		executor: executor,
+type RedisClient struct {
+	Args         [][]byte
+	Flags        int
+	RedisCommand *CmdExecutor
+	OutputBuf    resp.RedisData
+	Conn         net.Conn
+	RedisDb      *MemDb
+}
+
+func NewRedisClient() *RedisClient {
+	return &RedisClient{
+		Args:         nil,
+		Flags:        0,
+		RedisCommand: nil,
+		OutputBuf:    nil,
+		Conn:         nil,
+		RedisDb:      nil,
 	}
 }

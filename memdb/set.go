@@ -7,7 +7,9 @@ import (
 	"strings"
 )
 
-func sAddSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sAddSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "sadd" {
 		dblog.Logger.Error("sAddSet func: cmdName!= sadd")
@@ -38,7 +40,9 @@ func sAddSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	return resp.MakeIntData(int64(count))
 }
-func sCardSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sCardSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "scard" {
 		dblog.Logger.Error("aCardSet func: cmdName != scard")
@@ -64,7 +68,9 @@ func sCardSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	return resp.MakeIntData(int64(set.sLen()))
 }
-func sPopSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sPopSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "spop" {
 		dblog.Logger.Error("sPopSet func: cmdName != spop")
@@ -111,7 +117,9 @@ func sPopSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 }
 
 // TODO support count < 0
-func sRandMemberSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sRandMemberSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "srandmember" {
 		dblog.Logger.Error("sRandMemberSet func: cmdName != srandmember")
@@ -150,7 +158,9 @@ func sRandMemberSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeArrayData(result)
 }
 
-func sRemSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sRemSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "srem" {
 		dblog.Logger.Error("sRemset func: cmdName != srem")
@@ -188,7 +198,9 @@ func sRemSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 }
 
 // if set destination doesn't exist create an empty set first
-func sMoveSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sMoveSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "smove" {
 		dblog.Logger.Error("sMoveSet func: cmdName != smove")
@@ -241,7 +253,10 @@ func sMoveSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(1)
 }
 
-func sMembersSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sMembersSet(client *RedisClient) resp.RedisData {
+
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "smembers" {
 		dblog.Logger.Error("smembersSet func: cmdName != smembers")
@@ -289,7 +304,9 @@ func sGenericIsMember(mem *MemDb, key string, member string) resp.RedisData {
 	}
 
 }
-func sIsMemberSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sIsMemberSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "sismember" {
 		dblog.Logger.Error("sIsMember func: cmdName != sismember")
@@ -309,7 +326,9 @@ func sIsMemberSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return sGenericIsMember(mem, key, member)
 }
 
-func sMIsMemberSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sMIsMemberSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "smismember" {
 		dblog.Logger.Error("sMIsMember func: cmdName != smismember")
@@ -336,7 +355,9 @@ func sMIsMemberSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 //func genericDiff(mem *MemDb, targetSet Set, sets []Set, isStore bool, destination string) resp.RedisData {
 //
 //}
-func sDiffSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sDiffSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "sdiff" {
 		dblog.Logger.Error("sDiffSet func: cmdName != sdiff")
@@ -397,7 +418,9 @@ func sDiffSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 // use the LockMulti and lock the destination may lead to a deadlock
 // so when writing the destination UnLockMulti first
 // it means we can't use defer to unlock
-func sDiffStoreSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sDiffStoreSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "sdiffstore" {
 		dblog.Logger.Error("sDiffSet func: cmdName != sdiffstore")
@@ -465,7 +488,9 @@ func sDiffStoreSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 
 }
 
-func sInterSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sInterSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "sinter" {
 		dblog.Logger.Error("sDiffSet func: cmdName != sinter")
@@ -523,7 +548,9 @@ func sInterSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeArrayData(result)
 
 }
-func sInterStoreSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sInterStoreSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "sinterstore" {
 		dblog.Logger.Error("sDiffSet func: cmdName != sinterstore")
@@ -600,7 +627,9 @@ func sInterStoreSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(int64(interSet.sLen()))
 
 }
-func sUnionSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sUnionSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "sunion" {
 		dblog.Logger.Error("sDiffSet func: cmdName != sunion")
@@ -657,7 +686,9 @@ func sUnionSet(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeArrayData(result)
 
 }
-func sUnionStoreSet(mem *MemDb, cmd [][]byte) resp.RedisData {
+func sUnionStoreSet(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "sunionstore" {
 		dblog.Logger.Error("sDiffSet func: cmdName != sunionstore")

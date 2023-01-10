@@ -34,7 +34,7 @@ func Start(cfg *config.Config) error {
 		sg.Add(1)
 		go func() {
 			defer sg.Done()
-			handler.handle(conn)
+			handler.readQueryFromClient(conn)
 		}()
 	}
 	sg.Wait()

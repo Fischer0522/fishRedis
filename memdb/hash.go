@@ -7,7 +7,9 @@ import (
 	"strings"
 )
 
-func hGetHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hGetHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hget" {
 		dblog.Logger.Error("hGetHash func: cmdName != hget")
@@ -37,7 +39,9 @@ func hGetHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 
 // set multiple key-val
 // use HSET instead of HMSET
-func hSetHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hSetHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hset" {
 		dblog.Logger.Error("hSetHash func: cmdName != hset")
@@ -70,7 +74,9 @@ func hSetHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(int64(count))
 }
 
-func hDelHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hDelHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hdel" {
 		dblog.Logger.Error("hDelHash func: cmdName != hdel")
@@ -108,7 +114,9 @@ func hDelHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(int64(count))
 }
 
-func hMgetHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hMgetHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hmget" {
 		dblog.Logger.Error("hMgetHash func: cmdName != hmget")
@@ -140,7 +148,9 @@ func hMgetHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 
 	return resp.MakeArrayData(result)
 }
-func hSetnxHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hSetnxHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hsetnx" {
 		dblog.Logger.Error("hSetnxHash func: cmdName != hsetnx")
@@ -173,7 +183,9 @@ func hSetnxHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(1)
 }
 
-func hExistsHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hExistsHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hexists" {
 		dblog.Logger.Error("hexistHash func: cmdName !=hexists")
@@ -204,7 +216,9 @@ func hExistsHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(1)
 }
 
-func hGetAllHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hGetAllHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hgetall" {
 		dblog.Logger.Error("hGetAllHash func: cmdName != hgetall")
@@ -238,7 +252,9 @@ func hGetAllHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeArrayData(result)
 }
 
-func hIncrByHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hIncrByHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hincrby" {
 		dblog.Logger.Error("hIncrByHash func: cmdName != hincrby")
@@ -273,7 +289,9 @@ func hIncrByHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeIntData(int64(res))
 }
 
-func hIncrByFloatHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hIncrByFloatHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hincrbyfloat" {
 		dblog.Logger.Error("hIncrByFloatHash func: cmdName != hincrbyfloat")
@@ -307,7 +325,9 @@ func hIncrByFloatHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	return resp.MakeBulkData([]byte(strconv.FormatFloat(res, 'f', -1, 64)))
 }
-func hKeysHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hKeysHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hkeys" {
 		dblog.Logger.Error("hkeysHash func: cmdName != hkeys")
@@ -341,7 +361,9 @@ func hKeysHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeArrayData(result)
 }
 
-func hValsHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hValsHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hvals" {
 		dblog.Logger.Error("hValsHash func: cmdName != hvals")
@@ -376,7 +398,9 @@ func hValsHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeArrayData(result)
 }
 
-func hLenHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hLenHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hlen" {
 		dblog.Logger.Error("hLenHash func: cmdName != hlen")
@@ -401,7 +425,9 @@ func hLenHash(mem *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	return resp.MakeIntData(int64(hash.Len()))
 }
-func hStrLenHash(mem *MemDb, cmd [][]byte) resp.RedisData {
+func hStrLenHash(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "hstrlen" {
 		dblog.Logger.Error("hStrLen func: cmdName != hstrlen")

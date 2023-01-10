@@ -10,7 +10,8 @@ import (
 	"time"
 )
 
-func pingKey(mem *MemDb, cmd [][]byte) resp.RedisData {
+func pingKey(client *RedisClient) resp.RedisData {
+	cmd := client.Args
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "ping" {
 		dblog.Logger.Error("pingKey func: cmdName != ping")
@@ -24,7 +25,9 @@ func pingKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	return resp.MakeBulkData(cmd[1])
 }
-func delKey(mem *MemDb, cmd [][]byte) resp.RedisData {
+func delKey(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "del" {
 		dblog.Logger.Error("delKey func: cmdName != del")
@@ -43,7 +46,9 @@ func delKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	return resp.MakeIntData(int64(count))
 }
-func existsKey(mem *MemDb, cmd [][]byte) resp.RedisData {
+func existsKey(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "exists" {
 		dblog.Logger.Error("existsKey func: cmdName != exist")
@@ -65,7 +70,9 @@ func existsKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 	}
 	return resp.MakeIntData(int64(count))
 }
-func expireKey(mem *MemDb, cmd [][]byte) resp.RedisData {
+func expireKey(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "expire" {
 		dblog.Logger.Error("expireKey func: cmdName != expire")
@@ -125,7 +132,9 @@ func expireKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 }
 
 // TODO after finish the glob parse
-func keysKey(mem *MemDb, cmd [][]byte) resp.RedisData {
+func keysKey(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "keys" {
 		dblog.Logger.Error("keysKey func: cmdName != keys")
@@ -151,7 +160,9 @@ func keysKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeArrayData(res)
 }
 
-func persistKey(mem *MemDb, cmd [][]byte) resp.RedisData {
+func persistKey(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "persist" {
 		dblog.Logger.Error("persistKey func: cmdName != persist")
@@ -175,7 +186,9 @@ func persistKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 }
 
 // maybe not so random...
-func randomKey(mem *MemDb, cmd [][]byte) resp.RedisData {
+func randomKey(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "randomkey" {
 		dblog.Logger.Error("raddomKey func: cmdName != randomKey")
@@ -211,7 +224,9 @@ func randomKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeBulkData(nil)
 }
 
-func renameKey(mem *MemDb, cmd [][]byte) resp.RedisData {
+func renameKey(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "rename" {
 		dblog.Logger.Error("renameKey func: cmdName != rename")
@@ -240,7 +255,9 @@ func renameKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 	return resp.MakeStringData("OK")
 }
 
-func ttlKey(mem *MemDb, cmd [][]byte) resp.RedisData {
+func ttlKey(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "ttl" {
 		dblog.Logger.Error("ttlKey func: cmdName != ttl")
@@ -268,7 +285,9 @@ func ttlKey(mem *MemDb, cmd [][]byte) resp.RedisData {
 }
 
 // support string,list,hash,set
-func typeKey(mem *MemDb, cmd [][]byte) resp.RedisData {
+func typeKey(client *RedisClient) resp.RedisData {
+	cmd := client.Args
+	mem := client.RedisDb
 	cmdName := strings.ToLower(string(cmd[0]))
 	if cmdName != "type" {
 		dblog.Logger.Error("typeKey func: cmdName != type")

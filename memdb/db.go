@@ -2,8 +2,6 @@ package memdb
 
 import (
 	"fishRedis/dblog"
-	"fishRedis/resp"
-	"strings"
 	"time"
 )
 
@@ -19,21 +17,6 @@ func NewMemdb() *MemDb {
 		ttlKeys: NewConcurrentMap(DEFAULT_SIZE),
 		locks:   NewLocks(DEFAULT_SIZE * 2),
 	}
-}
-
-func (m *MemDb) ExecCommand(cmd [][]byte) resp.RedisData {
-	if len(cmd) == 0 {
-		return nil
-	}
-	cmdName := strings.ToLower(string(cmd[0]))
-	command, ok := cmdTable[cmdName]
-	if !ok {
-		return resp.MakeErrorData("error: unsupported command")
-	}
-	execFunc := command.executor
-
-	return execFunc(m, cmd)
-
 }
 
 // CheckTTL check ttlkeys and delete expired keys
