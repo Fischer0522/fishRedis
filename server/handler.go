@@ -68,17 +68,17 @@ func processCommand(redisClient *memdb.RedisClient) {
 		redisClient.OutputBuf = resp.MakeStringData("error unsupported command")
 	}
 	redisClient.RedisCommand = cmdExecutor
-
-	handle(redisClient)
-}
-
-func handle(redisClient *memdb.RedisClient) {
-	conn := redisClient.Conn
-
 	if redisClient.RedisCommand != nil {
 		execFunc := *redisClient.RedisCommand
 		redisClient.OutputBuf = execFunc(redisClient)
 	}
+
+	sendReplyToClient(redisClient)
+}
+
+func sendReplyToClient(redisClient *memdb.RedisClient) {
+	conn := redisClient.Conn
+
 	var res []byte
 	if redisClient.OutputBuf != nil {
 		res = redisClient.OutputBuf.ToBytes()
@@ -90,18 +90,5 @@ func handle(redisClient *memdb.RedisClient) {
 	if err != nil {
 		dblog.Logger.Error("write response to ", conn.RemoteAddr().String())
 	}
-	//if res != nil {
-	//	_, err := conn.Write(res)
-	//	if err != nil {
-	//		dblog.Logger.Error("write response to ", conn.RemoteAddr().String())
-	//	}
-	//} else {
-	//	var errData []byte
-	//	errData := resp.MakeErrorData("unknown error")
-	//	_, err := conn.Write(errData.ToBytes())
-	//	if err != nil {
-	//		dblog.Logger.Error("write response to ", conn.RemoteAddr().String())
-	//	}
-	//}
 
 }
