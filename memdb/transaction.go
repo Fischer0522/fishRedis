@@ -49,6 +49,23 @@ func multiTrans(client *RedisClient) resp.RedisData {
 	return resp.MakeStringData("OK")
 }
 
+func execTrans(client *RedisClient) resp.RedisData {
+	client.Flags &= ^REDIS_MULTI
+	if client.Mstate.count != 0 {
+		resArr := make([]resp.RedisData, 0, client.Mstate.count)
+		for _, command := range client.Mstate.commands {
+			cmd := command.argv
+			client.Args = cmd
+			execFunc := *command.redisCommand
+			res := execFunc(client)
+			resArr = append(resArr, res)
+		}
+		return resp.MakeArrayData(resArr)
+	}
+	return resp.MakeStringData("(empty list or set)")
+}
+
 func RegisterTransactionCommand() {
 	RegisterCommand("multi", multiTrans)
+	RegisterCommand("exec", execTrans)
 }

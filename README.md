@@ -31,7 +31,7 @@ lastmod: 2023-01-12T19:43:34Z
 Benchmark result is based on [redis-benchmark](https://redis.io/topics/benchmarks) tool.  
 Testing on Xiaoxin Pro13 Laptop with AMD Ryzen 7 4800U @1.80GHz, 16.0 GB RAM, and on windows 11 wsl2 ubuntu 20.04 system.
 
-​`./redis-benchmark -c 50  -n 200000 -t get`​​
+`./redis-benchmark -c 50  -n 200000 -t get`​​
 
 ```
 get:95192.77 requests per second
@@ -57,9 +57,15 @@ mset 64787.82 requests per second
 
 **Transaction Command**​
 
-* ​`multi`​
-* ​`watch`​
-* ​`exec`​
-* ​`dsicard`​
+- [x] `multi`​
+- [ ] `watch`​
+- [x] `exec`​
+- [ ] `dsicard`​
 
 **refactor the redisClient**
+
+- [ ] mstate
+- [ ] 
+
+
+**AOF**
