@@ -29,7 +29,7 @@ lastmod: 2023-01-12T19:43:34Z
 ## benchmark
 
 Benchmark result is based on [redis-benchmark](https://redis.io/topics/benchmarks) tool.  
-Testing on ThinkBook Laptop with AMD Ryzen 7 4800U @1.80GHz, 16.0 GB RAM, and on windows 11 wsl2 ubuntu 20.04 system.
+Testing on Xiaoxin Pro13 Laptop with AMD Ryzen 7 4800U @1.80GHz, 16.0 GB RAM, and on windows 11 wsl2 ubuntu 20.04 system.
 
 ​`./redis-benchmark -c 50  -n 200000 -t get`​​
 

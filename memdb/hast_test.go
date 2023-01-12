@@ -14,7 +14,11 @@ func init() {
 func TestSetAndGetHash(t *testing.T) {
 	mem := NewMemdb()
 	cmd := NewCommand("hset", "myhash", "field1", "value1")
-	res := hSetHash(mem, cmd)
+	client := &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res := hSetHash(client)
 	if res == nil {
 		t.Error("hset failed")
 	}
@@ -22,7 +26,8 @@ func TestSetAndGetHash(t *testing.T) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hget", "myhash", "field1")
-	res = hGetHash(mem, cmd)
+	client.Args = cmd
+	res = hGetHash(client)
 	if res == nil {
 		t.Error("hget failed")
 	}
@@ -31,7 +36,8 @@ func TestSetAndGetHash(t *testing.T) {
 	}
 	// test set multi field
 	cmd = NewCommand("hset", "myhash", "field2", "value2", "field3", "value3")
-	res = hSetHash(mem, cmd)
+	client.Args = cmd
+	res = hSetHash(client)
 	if res == nil {
 		t.Error("hmset failed")
 	}
@@ -39,7 +45,8 @@ func TestSetAndGetHash(t *testing.T) {
 		t.Errorf("hmset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(2).ToBytes())
 	}
 	cmd = NewCommand("hmget", "myhash", "field1", "field2", "field3")
-	res = hMgetHash(mem, cmd)
+	client.Args = cmd
+	res = hMgetHash(client)
 	if res == nil {
 		t.Error("hmget failed")
 	}
@@ -58,7 +65,11 @@ func TestSetAndGetHash(t *testing.T) {
 func TestDelHash(t *testing.T) {
 	mem := NewMemdb()
 	cmd := NewCommand("hset", "myhash", "field1", "value1")
-	res := hSetHash(mem, cmd)
+	client := &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res := hSetHash(client)
 	if res == nil {
 		t.Error("hset failed")
 	}
@@ -66,7 +77,8 @@ func TestDelHash(t *testing.T) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hdel", "myhash", "field1")
-	res = hDelHash(mem, cmd)
+	client.Args = cmd
+	res = hDelHash(client)
 	if res == nil {
 		t.Error("hdel failed")
 	}
@@ -74,7 +86,8 @@ func TestDelHash(t *testing.T) {
 		t.Errorf("hdel failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hget", "myhash", "field1")
-	res = hGetHash(mem, cmd)
+	client.Args = cmd
+	res = hGetHash(client)
 	if res == nil {
 		t.Error("hget failed")
 	}
@@ -86,7 +99,11 @@ func TestDelHash(t *testing.T) {
 func TestHSetNx(t *testing.T) {
 	mem := NewMemdb()
 	cmd := NewCommand("hset", "myhash", "field1", "value1")
-	res := hSetHash(mem, cmd)
+	client := &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res := hSetHash(client)
 	if res == nil {
 		t.Error("hset failed")
 	}
@@ -94,7 +111,8 @@ func TestHSetNx(t *testing.T) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hsetnx", "myhash", "field1", "value2")
-	res = hSetnxHash(mem, cmd)
+	client.Args = cmd
+	res = hSetnxHash(client)
 	if res == nil {
 		t.Error("hsetnx failed")
 	}
@@ -102,7 +120,8 @@ func TestHSetNx(t *testing.T) {
 		t.Errorf("hsetnx failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hsetnx", "myhash", "field2", "value2")
-	res = hSetnxHash(mem, cmd)
+	client.Args = cmd
+	res = hSetnxHash(client)
 	if res == nil {
 		t.Error("hsetnx failed")
 	}
@@ -110,7 +129,8 @@ func TestHSetNx(t *testing.T) {
 		t.Errorf("hsetnx failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(0).ToBytes())
 	}
 	cmd = NewCommand("hget", "myhash", "field1")
-	res = hGetHash(mem, cmd)
+	client.Args = cmd
+	res = hGetHash(client)
 	if res == nil {
 		t.Error("hget failed")
 	}
@@ -122,7 +142,11 @@ func TestHSetNx(t *testing.T) {
 func TestHLen(t *testing.T) {
 	mem := NewMemdb()
 	cmd := NewCommand("hset", "myhash", "field1", "value1")
-	res := hSetHash(mem, cmd)
+	client := &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res := hSetHash(client)
 	if res == nil {
 		t.Error("hset failed")
 	}
@@ -130,7 +154,8 @@ func TestHLen(t *testing.T) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hlen", "myhash")
-	res = hLenHash(mem, cmd)
+	client.Args = cmd
+	res = hLenHash(client)
 	if res == nil {
 		t.Error("hlen failed")
 	}
@@ -138,7 +163,8 @@ func TestHLen(t *testing.T) {
 		t.Errorf("hlen failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hset", "myhash", "field2", "value2")
-	res = hSetHash(mem, cmd)
+	client.Args = cmd
+	res = hSetHash(client)
 	if res == nil {
 		t.Error("hset failed")
 	}
@@ -146,7 +172,8 @@ func TestHLen(t *testing.T) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hlen", "myhash")
-	res = hLenHash(mem, cmd)
+	client.Args = cmd
+	res = hLenHash(client)
 	if res == nil {
 		t.Error("hlen failed")
 	}
@@ -157,17 +184,23 @@ func TestHLen(t *testing.T) {
 func TestHExists(t *testing.T) {
 	mem := NewMemdb()
 	cmd := NewCommand("hset", "myhash", "field1", "value1")
-	res := hSetHash(mem, cmd)
+	client := &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res := hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hexists", "myhash", "field1")
-	res = hExistsHash(mem, cmd)
+	client.Args = cmd
+	res = hExistsHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hexists failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hexists", "myhash", "field2")
-	res = hExistsHash(mem, cmd)
+	client.Args = cmd
+	res = hExistsHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(0).ToBytes()) {
 		t.Errorf("hexists failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(0).ToBytes())
 	}
@@ -176,17 +209,23 @@ func TestHExists(t *testing.T) {
 func TestHKeys(t *testing.T) {
 	mem := NewMemdb()
 	cmd := NewCommand("hset", "myhash", "field1", "value1")
-	res := hSetHash(mem, cmd)
+	client := &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res := hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hset", "myhash", "field2", "value2")
-	res = hSetHash(mem, cmd)
+	client.Args = cmd
+	res = hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hkeys", "myhash")
-	res = hKeysHash(mem, cmd)
+	client.Args = cmd
+	res = hKeysHash(client)
 	result := make([]resp.RedisData, 0)
 	result = append(result, resp.MakeBulkData([]byte("field1")))
 	result = append(result, resp.MakeBulkData([]byte("field2")))
@@ -197,17 +236,23 @@ func TestHKeys(t *testing.T) {
 func TestHVals(t *testing.T) {
 	mem := NewMemdb()
 	cmd := NewCommand("hset", "myhash", "field1", "value1")
-	res := hSetHash(mem, cmd)
+	client := &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res := hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hset", "myhash", "field2", "value2")
-	res = hSetHash(mem, cmd)
+	client.Args = cmd
+	res = hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hvals", "myhash")
-	res = hValsHash(mem, cmd)
+	client.Args = cmd
+	res = hValsHash(client)
 	result := make([]resp.RedisData, 0)
 	result = append(result, resp.MakeBulkData([]byte("value1")))
 	result = append(result, resp.MakeBulkData([]byte("value2")))
@@ -218,17 +263,23 @@ func TestHVals(t *testing.T) {
 func TestHGetAll(t *testing.T) {
 	mem := NewMemdb()
 	cmd := NewCommand("hset", "myhash", "field1", "value1")
-	res := hSetHash(mem, cmd)
+	client := &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res := hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hset", "myhash", "field2", "value2")
-	res = hSetHash(mem, cmd)
+	client.Args = cmd
+	res = hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hgetall", "myhash")
-	res = hGetAllHash(mem, cmd)
+	client.Args = cmd
+	res = hGetAllHash(client)
 	result := make([]resp.RedisData, 0)
 	result = append(result, resp.MakeBulkData([]byte("field1")))
 	result = append(result, resp.MakeBulkData([]byte("value1")))
@@ -241,22 +292,29 @@ func TestHGetAll(t *testing.T) {
 func TestHIncrBy(t *testing.T) {
 	mem := NewMemdb()
 	cmd := NewCommand("hset", "myhash", "field1", "10")
-	res := hSetHash(mem, cmd)
+	client := &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res := hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hincrby", "myhash", "field1", "10")
-	res = hIncrByHash(mem, cmd)
+	client.Args = cmd
+	res = hIncrByHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(20).ToBytes()) {
 		t.Errorf("hincrby failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(20).ToBytes())
 	}
 	cmd = NewCommand("hset", "myhash", "field2", "10")
-	res = hSetHash(mem, cmd)
+	client.Args = cmd
+	res = hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hincrby", "myhash", "field2", "-10")
-	res = hIncrByHash(mem, cmd)
+	client.Args = cmd
+	res = hIncrByHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(0).ToBytes()) {
 		t.Errorf("hincrby failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(0).ToBytes())
 	}
@@ -264,22 +322,29 @@ func TestHIncrBy(t *testing.T) {
 func TestHIncrByFloat(t *testing.T) {
 	mem := NewMemdb()
 	cmd := NewCommand("hset", "myhash", "field1", "10.50")
-	res := hSetHash(mem, cmd)
+	client := &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res := hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hincrbyfloat", "myhash", "field1", "0.1")
-	res = hIncrByFloatHash(mem, cmd)
+	client.Args = cmd
+	res = hIncrByFloatHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeBulkData([]byte("10.6")).ToBytes()) {
 		t.Errorf("hincrbyfloat failed,result:%s,expect:%s", res.ToBytes(), resp.MakeBulkData([]byte("10.6")).ToBytes())
 	}
 	cmd = NewCommand("hset", "myhash", "field2", "10.0")
-	res = hSetHash(mem, cmd)
+	client.Args = cmd
+	res = hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hincrbyfloat", "myhash", "field2", "-5.0")
-	res = hIncrByFloatHash(mem, cmd)
+	client.Args = cmd
+	res = hIncrByFloatHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeBulkData([]byte("5")).ToBytes()) {
 		t.Errorf("hincrbyfloat failed,result:%s,expect:%s", res.ToBytes(), resp.MakeBulkData([]byte("5")).ToBytes())
 	}
@@ -287,17 +352,25 @@ func TestHIncrByFloat(t *testing.T) {
 func TestHStrLen(t *testing.T) {
 	mem := NewMemdb()
 	cmd := NewCommand("hset", "myhash", "field1", "value1")
-	res := hSetHash(mem, cmd)
+	client := &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res := hSetHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(1).ToBytes()) {
 		t.Errorf("hset failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(1).ToBytes())
 	}
 	cmd = NewCommand("hstrlen", "myhash", "field1")
-	res = hStrLenHash(mem, cmd)
+	client = &RedisClient{
+		RedisDb: mem,
+		Args:    cmd,
+	}
+	res = hStrLenHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(6).ToBytes()) {
 		t.Errorf("hstrlen failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(6).ToBytes())
 	}
-	cmd = NewCommand("hstrlen", "myhash", "field2")
-	res = hStrLenHash(mem, cmd)
+	client.Args = NewCommand("hstrlen", "myhash", "field2")
+	res = hStrLenHash(client)
 	if !bytes.Equal(res.ToBytes(), resp.MakeIntData(0).ToBytes()) {
 		t.Errorf("hstrlen failed,result:%s,expect:%s", res.ToBytes(), resp.MakeIntData(0).ToBytes())
 	}
