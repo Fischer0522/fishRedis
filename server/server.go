@@ -24,6 +24,7 @@ func Start(cfg *config.Config) error {
 
 	var sg sync.WaitGroup
 	handler := NewHandler()
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {

@@ -6,6 +6,9 @@ import (
 )
 
 var CmdTable = make(map[string]*CmdExecutor)
+var REDIS_MULTI = 1 << 0
+var REDIS_DIRTY_CAS = 1 << 1
+var REDIS_DIRTY_EXEC = 1 << 2
 
 type CmdExecutor func(client *RedisClient) resp.RedisData
 
@@ -20,6 +23,7 @@ type RedisClient struct {
 	OutputBuf    resp.RedisData
 	Conn         net.Conn
 	RedisDb      *MemDb
+	Mstate       MultiState
 }
 
 func NewRedisClient() *RedisClient {
@@ -30,5 +34,6 @@ func NewRedisClient() *RedisClient {
 		OutputBuf:    nil,
 		Conn:         nil,
 		RedisDb:      nil,
+		Mstate:       NewMultiState(),
 	}
 }

@@ -30,6 +30,7 @@ func (h *Handler) readQueryFromClient(conn net.Conn) {
 		}
 	}()
 	ch := resp.ParseStream(conn)
+	redisClient := memdb.NewRedisClient()
 	for parsedRes := range ch {
 		if parsedRes.Err != nil {
 			if parsedRes.Err == io.EOF {
@@ -49,7 +50,6 @@ func (h *Handler) readQueryFromClient(conn net.Conn) {
 			continue
 		}
 		cmd := arrayData.ToCommand()
-		redisClient := memdb.NewRedisClient()
 		redisClient.Args = cmd
 		redisClient.Conn = conn
 		redisClient.RedisDb = h.memdb
@@ -68,9 +68,28 @@ func processCommand(redisClient *memdb.RedisClient) {
 		redisClient.OutputBuf = resp.MakeStringData("error unsupported command")
 	}
 	redisClient.RedisCommand = cmdExecutor
-	if redisClient.RedisCommand != nil {
-		execFunc := *redisClient.RedisCommand
-		redisClient.OutputBuf = execFunc(redisClient)
+	// if is in the transaction mode
+	if redisClient.Flags&memdb.REDIS_MULTI == memdb.REDIS_MULTI {
+
+		// if cmdName is EXEC DISCARD WATCH MULTI
+		_, ok := memdb.TransactionTable[cmdName]
+
+		if redisClient.RedisCommand != nil {
+			execFunc := *redisClient.RedisCommand
+			if ok {
+				redisClient.OutputBuf = execFunc(redisClient)
+			} else {
+				redisClient.Mstate.AddCommandToBuf(cmd, &execFunc)
+				redisClient.OutputBuf = resp.MakeStringData("QUEUED")
+			}
+		}
+
+	} else {
+		if redisClient.RedisCommand != nil {
+			execFunc := *redisClient.RedisCommand
+			redisClient.OutputBuf = execFunc(redisClient)
+		}
+
 	}
 
 	sendReplyToClient(redisClient)

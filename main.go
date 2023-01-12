@@ -15,6 +15,8 @@ func init() {
 	memdb.RegisterHashCommand()
 	memdb.RegisterSetCommands()
 	memdb.RegisterKeyCommand()
+	memdb.InitTransactionTable()
+	memdb.RegisterTransactionCommand()
 }
 func main() {
 	dblog.InitLogger()
