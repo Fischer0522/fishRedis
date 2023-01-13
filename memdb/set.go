@@ -38,6 +38,7 @@ func sAddSet(client *RedisClient) resp.RedisData {
 		res := set.sAdd(string(cmd[i]))
 		count += res
 	}
+	mem.TouchWatchKey(key)
 	return resp.MakeIntData(int64(count))
 }
 func sCardSet(client *RedisClient) resp.RedisData {
@@ -113,6 +114,7 @@ func sPopSet(client *RedisClient) resp.RedisData {
 			mem.db.Delete(key)
 		}
 	}()
+	mem.TouchWatchKey(key)
 	return resp.MakeArrayData(result)
 }
 
@@ -194,6 +196,7 @@ func sRemSet(client *RedisClient) resp.RedisData {
 			mem.db.Delete(key)
 		}
 	}()
+	mem.TouchWatchKey(key)
 	return resp.MakeIntData(int64(count))
 }
 
@@ -250,6 +253,8 @@ func sMoveSet(client *RedisClient) resp.RedisData {
 			mem.db.Delete(source)
 		}
 	}()
+	mem.TouchWatchKey(source)
+	mem.TouchWatchKey(des)
 	return resp.MakeIntData(1)
 }
 
@@ -483,6 +488,7 @@ func sDiffStoreSet(client *RedisClient) resp.RedisData {
 	defer mem.locks.Unlock(destination)
 
 	mem.db.Set(destination, diffSet)
+	mem.TouchWatchKey(destination)
 
 	return resp.MakeIntData(int64(diffSet.sLen()))
 
@@ -623,7 +629,7 @@ func sInterStoreSet(client *RedisClient) resp.RedisData {
 	defer mem.locks.Unlock(destination)
 
 	mem.db.Set(destination, interSet)
-
+	mem.TouchWatchKey(destination)
 	return resp.MakeIntData(int64(interSet.sLen()))
 
 }
@@ -756,6 +762,7 @@ func sUnionStoreSet(client *RedisClient) resp.RedisData {
 	defer mem.locks.Unlock(destination)
 
 	mem.db.Set(destination, unionSet)
+	mem.TouchWatchKey(destination)
 
 	return resp.MakeIntData(int64(unionSet.sLen()))
 }

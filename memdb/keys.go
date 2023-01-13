@@ -43,7 +43,9 @@ func delKey(client *RedisClient) resp.RedisData {
 		res := mem.db.Delete(key)
 		mem.ttlKeys.Delete(key)
 		count += res
+		mem.TouchWatchKey(key)
 	}
+
 	return resp.MakeIntData(int64(count))
 }
 func existsKey(client *RedisClient) resp.RedisData {
@@ -128,6 +130,7 @@ func expireKey(client *RedisClient) resp.RedisData {
 		}
 		result = mem.SetTTL(key, ttl)
 	}
+	mem.TouchWatchKey(key)
 	return resp.MakeIntData(int64(result))
 }
 
@@ -252,6 +255,8 @@ func renameKey(client *RedisClient) resp.RedisData {
 	mem.db.Delete(newKey)
 	mem.DeleteTTL(newKey)
 	mem.db.Set(newKey, oldVal)
+	mem.TouchWatchKey(key)
+	mem.TouchWatchKey(newKey)
 	return resp.MakeStringData("OK")
 }
 

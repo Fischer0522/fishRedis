@@ -71,6 +71,7 @@ func hSetHash(client *RedisClient) resp.RedisData {
 		num := hash.Set(field, val)
 		count += num
 	}
+	mem.TouchWatchKey(key)
 	return resp.MakeIntData(int64(count))
 }
 
@@ -111,6 +112,7 @@ func hDelHash(client *RedisClient) resp.RedisData {
 			mem.db.Delete(key)
 		}
 	}()
+	mem.TouchWatchKey(key)
 	return resp.MakeIntData(int64(count))
 }
 
@@ -180,6 +182,7 @@ func hSetnxHash(client *RedisClient) resp.RedisData {
 		return resp.MakeIntData(0)
 	}
 	hash.Set(field, value)
+	mem.TouchWatchKey(key)
 	return resp.MakeIntData(1)
 }
 
@@ -286,6 +289,7 @@ func hIncrByHash(client *RedisClient) resp.RedisData {
 	if err != nil {
 		return resp.MakeErrorData("hash value is not an integer")
 	}
+	mem.TouchWatchKey(key)
 	return resp.MakeIntData(int64(res))
 }
 
@@ -323,6 +327,7 @@ func hIncrByFloatHash(client *RedisClient) resp.RedisData {
 	if err != nil {
 		return resp.MakeErrorData("hash value is not a float")
 	}
+	mem.TouchWatchKey(key)
 	return resp.MakeBulkData([]byte(strconv.FormatFloat(res, 'f', -1, 64)))
 }
 func hKeysHash(client *RedisClient) resp.RedisData {

@@ -6,16 +6,18 @@ import (
 )
 
 type MemDb struct {
-	db      *ConcurrentMap
-	ttlKeys *ConcurrentMap
-	locks   *Locks
+	db        *ConcurrentMap
+	ttlKeys   *ConcurrentMap
+	watchKeys *ConcurrentMap
+	locks     *Locks
 }
 
 func NewMemdb() *MemDb {
 	return &MemDb{
-		db:      NewConcurrentMap(DEFAULT_SIZE),
-		ttlKeys: NewConcurrentMap(DEFAULT_SIZE),
-		locks:   NewLocks(DEFAULT_SIZE * 2),
+		db:        NewConcurrentMap(DEFAULT_SIZE),
+		ttlKeys:   NewConcurrentMap(DEFAULT_SIZE),
+		watchKeys: NewConcurrentMap(DEFAULT_SIZE),
+		locks:     NewLocks(DEFAULT_SIZE * 2),
 	}
 }
 
@@ -60,5 +62,19 @@ func (m *MemDb) DeleteTTL(key string) int {
 		dblog.Logger.Debugf("DeleteTTL key not exist key = %s,maybe is expired", key)
 	}
 	return m.ttlKeys.Delete(key)
+
+}
+
+func (m *MemDb) TouchWatchKey(key string) {
+	temp, ok := m.watchKeys.Get(key)
+	if ok {
+		// if the key is being watched
+		set := temp.(map[*RedisClient]null)
+		// mark all clients that watch the key dirty
+		for client := range set {
+			client.Flags |= REDIS_DIRTY_CAS
+		}
+
+	}
 
 }

@@ -112,6 +112,7 @@ func setString(client *RedisClient) resp.RedisData {
 		ttlTime := time.Now().Unix() + exval
 		m.SetTTL(key, ttlTime)
 	}
+	m.TouchWatchKey(key)
 	return res
 
 }
@@ -249,6 +250,7 @@ func setRangeString(client *RedisClient) resp.RedisData {
 
 	}
 	m.db.Set(key, newVal)
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(int64(len(newVal)))
 }
 func mGetString(client *RedisClient) resp.RedisData {
@@ -313,6 +315,7 @@ func mSetString(client *RedisClient) resp.RedisData {
 	for i := 0; i < len(keys); i++ {
 		m.DeleteTTL(keys[i])
 		m.db.Set(keys[i], vals[i])
+		m.TouchWatchKey(keys[i])
 	}
 	return resp.MakeStringData("OK")
 }
@@ -341,6 +344,7 @@ func setExString(client *RedisClient) resp.RedisData {
 	defer m.locks.Unlock(key)
 	m.db.Set(key, val)
 	m.ttlKeys.Set(key, newTTL)
+	m.TouchWatchKey(key)
 	return resp.MakeStringData("OK")
 }
 func setNxString(client *RedisClient) resp.RedisData {
@@ -360,6 +364,7 @@ func setNxString(client *RedisClient) resp.RedisData {
 	m.locks.Lock(key)
 	defer m.locks.Unlock(key)
 	res := m.db.SetIfNotExist(key, val)
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(int64(res))
 
 }
@@ -424,6 +429,7 @@ func incrString(client *RedisClient) resp.RedisData {
 	intVal++
 	// no need to deleteTTL
 	m.db.Set(key, []byte(strconv.FormatInt(intVal, 10)))
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(intVal)
 
 }
@@ -465,6 +471,7 @@ func incrByString(client *RedisClient) resp.RedisData {
 	}
 	intVal += increment
 	m.db.Set(key, []byte(strconv.FormatInt(intVal, 10)))
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(intVal)
 }
 
@@ -501,6 +508,7 @@ func decrString(client *RedisClient) resp.RedisData {
 	}
 	intVal--
 	m.db.Set(key, []byte(strconv.FormatInt(intVal, 10)))
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(intVal)
 }
 
@@ -541,6 +549,7 @@ func decrByString(client *RedisClient) resp.RedisData {
 	}
 	intVal -= decrement
 	m.db.Set(key, []byte(strconv.FormatInt(intVal, 10)))
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(intVal)
 
 }
@@ -583,6 +592,7 @@ func incrByFloatString(client *RedisClient) resp.RedisData {
 	}
 	floatVal += inc
 	m.db.Set(key, []byte(strconv.FormatFloat(floatVal, 'f', -1, 64)))
+	m.TouchWatchKey(key)
 	return resp.MakeBulkData([]byte(strconv.FormatFloat(floatVal, 'f', -1, 64)))
 
 }
@@ -614,6 +624,7 @@ func appendString(client *RedisClient) resp.RedisData {
 	}
 	newVal := append(oldvalWithType, val...)
 	m.db.Set(key, newVal)
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(int64(len(newVal)))
 }
 

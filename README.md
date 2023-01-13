@@ -8,23 +8,23 @@ lastmod: 2023-01-12T19:43:34Z
 
 ## Commands
 
-|keys|stirng|list|hash|set|
-| -----------| -------------| ---------| --------------| -------------|
-|ping|set|llen|hdel|sadd|
-|del|get|lindex|hexists|scard|
-|exists|getrange|lpos|hgetall|sdiff|
-|expire|setrange|lpop|hincrby|sdiffstore|
-|keys|mget|rpop|hincybyfloat|sinter|
-|persist|mset|lpush|hkeys|sinterstore|
-|randomkey|setex|lpushx|hlen|sismember|
-|rename|setnx|rpush|hmget|smismember|
-|ttl|strlen|rpushx|hset|smembers|
-|type|incr|linsert|hget|smove|
-||decr|lset|hsetnx|spop|
-||decrby|lrem|hstrlen|srandmember|
-||incrbyfloat|ltrim|hvals|srem|
-||append|lrange||sunion|
-|||||sunionstore|
+|keys|stirng|list|hash|set|transaction|
+| -----------| -------------| ---------| --------------| ------------- | ------------- |
+|ping|set|llen|hdel|sadd|multi|
+|del|get|lindex|hexists|scard|exec|
+|exists|getrange|lpos|hgetall|sdiff|discard|
+|expire|setrange|lpop|hincrby|sdiffstore|watch|
+|keys|mget|rpop|hincybyfloat|sinter|unwatch|
+|persist|mset|lpush|hkeys|sinterstore||
+|randomkey|setex|lpushx|hlen|sismember||
+|rename|setnx|rpush|hmget|smismember||
+|ttl|strlen|rpushx|hset|smembers||
+|type|incr|linsert|hget|smove||
+||decr|lset|hsetnx|spop||
+||decrby|lrem|hstrlen|srandmember||
+||incrbyfloat|ltrim|hvals|srem||
+||append|lrange||sunion||
+|||||sunionstore||
 
 ## benchmark
 
@@ -58,13 +58,13 @@ mset 64787.82 requests per second
 **Transaction Command**​
 
 - [x] `multi`​
-- [ ] `watch`​
+- [x] `watch`​
 - [x] `exec`​
-- [ ] `dsicard`​
+- [x] `dsicard`​
 
 **refactor the redisClient**
 
-- [ ] mstate
+- [x] mstate
 - [ ] 
 
 

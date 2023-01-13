@@ -105,6 +105,7 @@ func lPushList(client *RedisClient) resp.RedisData {
 	for i := 2; i < length; i++ {
 		listVal.lPush(cmd[i])
 	}
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(int64(listVal.Length))
 }
 
@@ -137,6 +138,7 @@ func lPushxList(client *RedisClient) resp.RedisData {
 	for i := 2; i < length; i++ {
 		listVal.lPush(cmd[i])
 	}
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(int64(listVal.Length))
 }
 
@@ -167,6 +169,7 @@ func lPopList(client *RedisClient) resp.RedisData {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding thr wrong kind of value")
 	}
 	res := listVal.lPop()
+	m.TouchWatchKey(key)
 	defer func() {
 		if listVal.Length == 0 {
 			m.DeleteTTL(key)
@@ -207,6 +210,7 @@ func rPushList(client *RedisClient) resp.RedisData {
 	for i := 2; i < length; i++ {
 		listVal.rPush(cmd[i])
 	}
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(int64(listVal.Length))
 }
 func rPopList(client *RedisClient) resp.RedisData {
@@ -236,6 +240,7 @@ func rPopList(client *RedisClient) resp.RedisData {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding thr wrong kind of value")
 	}
 	res := listVal.rPop()
+	m.TouchWatchKey(key)
 	defer func() {
 		if listVal.Length == 0 {
 			m.DeleteTTL(key)
@@ -274,6 +279,7 @@ func rPushxList(client *RedisClient) resp.RedisData {
 	for i := 2; i < length; i++ {
 		listVal.rPush(cmd[i])
 	}
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(int64(listVal.Length))
 }
 func lPosList(client *RedisClient) resp.RedisData {
@@ -387,6 +393,7 @@ func lInsertList(client *RedisClient) resp.RedisData {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
 	res := listVal.lInsert(isBefore, pivot, element)
+	m.TouchWatchKey(key)
 	return resp.MakeIntData(int64(res))
 }
 func lRangeList(client *RedisClient) resp.RedisData {
@@ -463,6 +470,7 @@ func lRemList(client *RedisClient) resp.RedisData {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
 	res := listVal.deleteByVal(element, count)
+	m.TouchWatchKey(key)
 
 	defer func() {
 		if listVal.Length == 0 {
@@ -503,6 +511,7 @@ func lSetList(client *RedisClient) resp.RedisData {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
 	res := listVal.set(element, index)
+	m.TouchWatchKey(key)
 	if res == false {
 		return resp.MakeErrorData("index out if range")
 	} else {
@@ -546,6 +555,7 @@ func lTrimList(client *RedisClient) resp.RedisData {
 		return resp.MakeErrorData("WRONGTYPE Operation against a key holding the wrong kind of value")
 	}
 	listVal.trim(start, end)
+	m.TouchWatchKey(key)
 	return resp.MakeStringData("OK")
 }
 
