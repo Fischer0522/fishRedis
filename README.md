@@ -64,8 +64,11 @@ mset 64787.82 requests per second
 
 **refactor the redisClient**
 
-- [x] mstate
-- [ ] 
+- [x] mstate 
 
 
 **AOF**
+- [] 
+
+**master-slave**
+-[] use rpc to implement
