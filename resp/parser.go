@@ -22,13 +22,13 @@ type readState struct {
 	inArray   bool
 }
 
-func ParseStream(reader io.Reader) <-chan *ParsedRes {
+func ParseStream(reader io.Reader) chan *ParsedRes {
 	ch := make(chan *ParsedRes)
 	go parse(reader, ch)
 	return ch
 }
 
-func parse(reader io.Reader, ch chan<- *ParsedRes) {
+func parse(reader io.Reader, ch chan *ParsedRes) {
 	bufReader := bufio.NewReader(reader)
 	state := new(readState)
 	for {

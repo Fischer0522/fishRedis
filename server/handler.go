@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fishRedis/aof"
 	"fishRedis/dblog"
 	"fishRedis/memdb"
 	"fishRedis/resp"
@@ -19,7 +20,7 @@ func NewHandler() *Handler {
 	}
 }
 
-func (h *Handler) readQueryFromClient(conn net.Conn) {
+func (h *Handler) readQueryFromClient(conn net.Conn, aofIsOn bool) {
 	defer func() {
 		err := conn.Close()
 		if err != nil {
@@ -31,6 +32,11 @@ func (h *Handler) readQueryFromClient(conn net.Conn) {
 	}()
 	ch := resp.ParseStream(conn)
 	redisClient := memdb.NewRedisClient()
+	aofChan := make(chan []byte, 1000)
+	if aofIsOn {
+		go aof.AofWrite(aofChan)
+	}
+
 	for parsedRes := range ch {
 		if parsedRes.Err != nil {
 			if parsedRes.Err == io.EOF {
@@ -49,15 +55,17 @@ func (h *Handler) readQueryFromClient(conn net.Conn) {
 			dblog.Logger.Error("parsedRes.Data is not ArrayData from ", conn.RemoteAddr().String())
 			continue
 		}
+		aofChan <- arrayData.ToBytes()
 		cmd := arrayData.ToCommand()
 		redisClient.Args = cmd
 		redisClient.Conn = conn
 		redisClient.RedisDb = h.memdb
-		processCommand(redisClient)
+		ProcessCommand(redisClient)
+		sendReplyToClient(redisClient)
 
 	}
 }
-func processCommand(redisClient *memdb.RedisClient) {
+func ProcessCommand(redisClient *memdb.RedisClient) {
 	cmd := redisClient.Args
 	if len(cmd) == 0 {
 		return
@@ -92,7 +100,6 @@ func processCommand(redisClient *memdb.RedisClient) {
 
 	}
 
-	sendReplyToClient(redisClient)
 }
 
 func sendReplyToClient(redisClient *memdb.RedisClient) {

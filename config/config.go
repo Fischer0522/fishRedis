@@ -14,6 +14,7 @@ var (
 	defaultLogDir   = "./"
 	defaultLogLevel = "info"
 	defaultShardNum = 1024
+	defaultAof      = true
 )
 
 type Config struct {
@@ -23,6 +24,7 @@ type Config struct {
 	LogDir   string
 	LogLevel string
 	ShardNum int
+	AofIsOn  bool
 }
 
 type CfgError struct {
@@ -47,6 +49,7 @@ func Setup() (*Config, error) {
 		LogDir:   defaultLogDir,
 		LogLevel: defaultLogLevel,
 		ShardNum: defaultShardNum,
+		AofIsOn:  defaultAof,
 	}
 	flagInit(cfg)
 	flag.Parse()
