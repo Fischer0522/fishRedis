@@ -29,7 +29,7 @@ lastmod: 2023-01-12T19:43:34Z
 ## benchmark
 
 Benchmark result is based on [redis-benchmark](https://redis.io/topics/benchmarks) tool.  
-Testing on Xiaoxin Pro13 Laptop with AMD Ryzen 7 4800U @1.80GHz, 16.0 GB RAM, and on windows 11 wsl2 ubuntu 20.04 system.
+Testing on Xiaoxin Pro13 Laptop with AMD Ryzen 7 4800U @1.80GHz, 16.0 GB RAM, and on windows 11 wsl2 ubuntu 20.04 system And MacBook Pro With M1 Pro
 
 `./redis-benchmark -c 50  -n 200000 -t get`​​
 
@@ -52,6 +52,30 @@ lrange_500 7857.93 requests per second
 lrange_600 4680.44 requests per second
 mset 64787.82 requests per second
 ```
+
+```
+get:117164.62 requests per second
+set: 110987.79 requests per second
+incr:110864.74 requests per second
+lpush:103519.66 requests per second
+rpush:112803.16 requests per second
+lpop:111731.84 requests per second
+rpop:108283.70 requests per second
+sadd:111111.12 requests per second
+hset:113700.97 requests per second
+spop:123762.38 requests per second
+
+
+lrange_100 46072.33 requests per second
+lrange_300 21822.15 requests per second
+lrange_500 18185.12 requests per second
+lrange_600 11410.32 requests per second
+mset 84961.77 requests per second
+```
+
+
+
+
 
 ## Todo
 
